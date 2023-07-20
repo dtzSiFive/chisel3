@@ -545,21 +545,34 @@ class BoringUtilsSpec extends ChiselFlatSpec with ChiselRunners with Utils with 
   }
 
   "Defining a writable probe by tapping element within an aggregate" should "work" in {
-    val chirrtl = circt.stage.ChiselStage.emitSystemVerilog(
-      new RawModule {
-        class Child() extends RawModule {
-          val io = IO(new Bundle {
+    class Test extends RawModule {
+      class Child() extends RawModule {
+        val io = IO(new Bundle {
+            val y = Input(Bool())
             val x = Output(Bool())
-          })
-        }
+            })
+        io.x := io.y
+      }
 
-        val outProbe = IO(probe.RWProbe(Bool()))
-        val child = Module(new Child())
-        probe.define(outProbe, BoringUtils.rwTap(child.io.x))
-      },
-      Array("--full-stacktrace")
-    )
+      val outRW_X= IO(probe.RWProbe(Bool()))
+      val outRW_Y = IO(probe.RWProbe(Bool()))
+      val outXRead = IO(Bool())
+      val outX = IO(Bool())
+      val inY = IO(Input(Bool()))
+      val child = Module(new Child())
+      child.io.y := inY
 
+      probe.define(outRW_X, BoringUtils.rwTap(child.io.x))
+      probe.define(outRW_Y, BoringUtils.rwTap(child.io.y))
+
+      outXRead := probe.read(outRW_X)
+      outX := child.io.x // check that users use rwprobe target
+    }
+
+    val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Test, Array("--full-stacktrace"))
     println(chirrtl)
+    val sv = circt.stage.ChiselStage.emitSystemVerilog(new Test, Array("--full-stacktrace"))
+    println(sv)
+
   }
 }
