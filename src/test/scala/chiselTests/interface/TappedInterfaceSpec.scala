@@ -24,6 +24,8 @@ class TappedInterfaceSpec extends AnyFunSpec with Matchers {
       val b = Output(Bool())
       val c = Output(RWProbe(Bool()))
       val d = Output(RWProbe(Bool()))
+      val e = Output(RWProbe(Bool()))
+      val f = Output(RWProbe(Bool()))
     }
 
     override type Ports = WrapperModuleInterfaceBundle
@@ -62,6 +64,8 @@ class TappedInterfaceSpec extends AnyFunSpec with Matchers {
       val world = IO(Output(Bool()))
       val tapWire = IO(Output(RWProbe(Bool())))
       val tapReg = IO(Output(RWProbe(Bool())))
+      val tapX = IO(Output(RWProbe(Bool())))
+      val tapY = IO(Output(RWProbe(Bool())))
 
       val internalModule = Module(new InternalModule)
 
@@ -70,6 +74,8 @@ class TappedInterfaceSpec extends AnyFunSpec with Matchers {
 
       define(tapWire, rwTap(internalModule.internalWire))
       define(tapReg, rwTap(internalModule.internalReg))
+      define(tapX, rwTap(internalModule.x))
+      define(tapY, rwTap(internalModule.y))
     }
 
     /** The owner of the "DUT" (WrapperModule) needs to write this. This defines how to
@@ -84,7 +90,9 @@ class TappedInterfaceSpec extends AnyFunSpec with Matchers {
           _.hello -> _.a,
           _.world -> _.b,
           _.tapWire -> _.c,
-          _.tapReg -> _.d
+          _.tapReg -> _.d,
+          _.tapX -> _.e,
+          _.tapY -> _.f
         )
 
         override def properties = {}
@@ -103,14 +111,42 @@ class TappedInterfaceSpec extends AnyFunSpec with Matchers {
     class Foo extends Module {
       val a = IO(Input(Bool()))
       val b = IO(Output(Bool()))
+      val c = IO(Input(Bool()))
 
       val baz = chisel3.Module(new WrapperModuleInterface.Wrapper.BlackBox)
 
       baz.io.a := a
-      b := baz.io.b
+      // b := baz.io.b // (see below)
+      b := a // don't force net leading to top-level ports, or verilator rejects:
+      /**
+        * STDERR:
+        * %Error-UNSUPPORTED: test_run_dir/interface/TappedInterfaceSpec/should-compile-a-design-separably/compile-0/Foo.sv:7:10: Unsupported: Force/Release on primary input/output net 'b'
+        *                                                                                                                       : ... Suggest assign it to/from a temporary net and force/release that
+        *     7 |   output b
+        *       |          ^
+        *                     ... For error description see https://verilator.org/warn/UNSUPPORTED?v=5.006
+        * %Error: Exiting due to 1 error(s)
+        *         ... See the manual at https://verilator.org/verilator_doc.html for more assistance.
+        */
 
       forceInitial(baz.io.c, true.B)
       force(clock, reset.asBool, baz.io.d, false.B)
+      release(clock, ~reset.asBool, baz.io.d)
+
+      // Verilator lint error about assigning to input signal.
+      /**
+        * STDERR:
+        * %Error-ASSIGNIN: test_run_dir/interface/TappedInterfaceSpec/should-compile-a-design-separably/compile-0/Foo.sv:19:47: Assigning to input/const variable: 'x'
+        *    19 |         force Foo.baz.internal.internalModule.x = 1'h0;
+        *       |                                               ^
+        *                  ... For error description see https://verilator.org/warn/ASSIGNIN?v=5.006
+        * %Error: Exiting due to 1 error(s)
+        *         ... See the manual at https://verilator.org/verilator_doc.html for more assistance.
+        */
+      // force(clock, c, baz.io.e, false.B)
+
+      // Forcing output is fine.
+      force(clock, c, baz.io.f, false.B)
     }
   }
 
