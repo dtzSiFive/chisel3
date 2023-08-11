@@ -24,6 +24,8 @@ class TappedInterfaceSpec extends AnyFunSpec with Matchers {
       val b = Output(Bool())
       val c = Output(RWProbe(Bool()))
       val d = Output(RWProbe(Bool()))
+      val e = Output(RWProbe(Bool()))
+      val f = Output(RWProbe(Bool()))
     }
 
     override type Ports = WrapperModuleInterfaceBundle
@@ -43,6 +45,8 @@ class TappedInterfaceSpec extends AnyFunSpec with Matchers {
     class InternalModule extends Module {
       val x = IO(Input(Bool()))
       val y = IO(Output(Bool()))
+      val tapX = IO(Output(RWProbe(Bool())))
+      val tapY = IO(Output(RWProbe(Bool())))
       val lfsr = chisel3.util.random.LFSR(16)
 
       // things that will get tapped
@@ -52,6 +56,11 @@ class TappedInterfaceSpec extends AnyFunSpec with Matchers {
       internalReg := lfsr(1)
 
       y := x ^ internalWire ^ internalReg
+
+      // TODO: Have rwTap tap ports from inside modules.
+      // TODO: Verilator rejects forcing input port?
+      define(tapX, RWProbeValue(x))
+      define(tapY, RWProbeValue(y))
     }
 
     /** This wraps the above module and taps into it in order to create an
@@ -62,6 +71,8 @@ class TappedInterfaceSpec extends AnyFunSpec with Matchers {
       val world = IO(Output(Bool()))
       val tapWire = IO(Output(RWProbe(Bool())))
       val tapReg = IO(Output(RWProbe(Bool())))
+      val tapX = IO(Output(RWProbe(Bool())))
+      val tapY = IO(Output(RWProbe(Bool())))
 
       val internalModule = Module(new InternalModule)
 
@@ -70,6 +81,11 @@ class TappedInterfaceSpec extends AnyFunSpec with Matchers {
 
       define(tapWire, rwTap(internalModule.internalWire))
       define(tapReg, rwTap(internalModule.internalReg))
+      // TODO: rwTap input port -> tap from inside?
+      // define(tapX, rwTap(internalModule.x))
+      // define(tapY, rwTap(internalModule.y))
+      define(tapX, internalModule.tapX)
+      define(tapY, internalModule.tapY)
     }
 
     /** The owner of the "DUT" (WrapperModule) needs to write this. This defines how to
@@ -84,7 +100,9 @@ class TappedInterfaceSpec extends AnyFunSpec with Matchers {
           _.hello -> _.a,
           _.world -> _.b,
           _.tapWire -> _.c,
-          _.tapReg -> _.d
+          _.tapReg -> _.d,
+          _.tapX -> _.e,
+          _.tapY -> _.f
         )
 
         override def properties = {}
@@ -103,14 +121,21 @@ class TappedInterfaceSpec extends AnyFunSpec with Matchers {
     class Foo extends Module {
       val a = IO(Input(Bool()))
       val b = IO(Output(Bool()))
+      val c = IO(Input(Bool()))
 
       val baz = chisel3.Module(new WrapperModuleInterface.Wrapper.BlackBox)
 
       baz.io.a := a
-      b := baz.io.b
+      // b := baz.io.b // (see below)
+      b := a  // don't force net leading to top-level ports, or verilator rejects.
 
       forceInitial(baz.io.c, true.B)
       force(clock, reset.asBool, baz.io.d, false.B)
+      release(clock, ~reset.asBool, baz.io.d)
+
+      // Verilator error about assigning to input signal??
+      // force(clock, c, baz.io.e, false.B)
+      force(clock, c, baz.io.f, false.B)
     }
   }
 
