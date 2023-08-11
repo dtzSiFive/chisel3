@@ -235,7 +235,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
           val x = Bool()
         }
         class Child() extends RawModule {
-          val b = Wire(new MiniBundle)
+          val b = IO(new MiniBundle)
         }
 
         val child = Module(new Child())
@@ -252,7 +252,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
       }
     )
     matchesAndOmits(chirrtl)(
-      "wire b : { x : UInt<1>}",
+      "output b : { x : UInt<1>}",
       "define bore = rwprobe(b.x)",
       "define bore_1 = rwprobe(b)",
       "define outRWProbe = child.bore",
@@ -265,7 +265,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
     val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(
       new RawModule {
         class Child() extends RawModule {
-          val b = Wire(Vec(4, Bool()))
+          val b = IO(Vec(4, Bool()))
         }
 
         val child = Module(new Child())
@@ -282,7 +282,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
       }
     )
     matchesAndOmits(chirrtl)(
-      "wire b : UInt<1>[4]",
+      "output b : UInt<1>[4]",
       "define bore = rwprobe(b[2])",
       "define bore_1 = rwprobe(b)",
       "define outRWProbe = child.bore",
