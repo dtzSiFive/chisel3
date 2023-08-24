@@ -11,6 +11,21 @@ import scala.collection.immutable.{ListMap, SeqMap, VectorMap}
 class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   behavior.of("Property")
 
+  // Generate CHIRRTL for inspection, and check SV generation.
+  def emitCHIRRTLAndGenSV(gen: => RawModule, exc: Option[String] = None): String = {
+    val chirrtl = ChiselStage.emitCHIRRTL(gen)
+    exc match {
+      case None => ChiselStage.emitSystemVerilog(gen)
+      case Some(msg) => {
+        val exception = intercept[RuntimeException] {
+          ChiselStage.emitSystemVerilog(gen)
+        }
+        exception.getMessage should include(msg)
+      }
+    }
+    chirrtl
+  }
+
   it should "fail to compile with unsupported Property types" in {
     assertTypeError("""
       class MyThing
@@ -26,7 +41,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support Int as a Property type" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val intProp = IO(Input(Property[Int]()))
     })
 
@@ -36,7 +51,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support Int as a Property literal" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val propOut = IO(Output(Property[Int]()))
       propOut := Property(123)
     })
@@ -47,7 +62,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support Long as a Property type" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val longProp = IO(Input(Property[Long]()))
     })
 
@@ -57,7 +72,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support Long as a Property literal" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val propOut = IO(Output(Property[Long]()))
       propOut := Property[Long](123)
     })
@@ -68,7 +83,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support BigInt as a Property type" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val bigIntProp = IO(Input(Property[BigInt]()))
     })
 
@@ -78,7 +93,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support BigInt as a Property literal" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val propOut = IO(Output(Property[BigInt]()))
       propOut := Property[BigInt](123)
     })
@@ -110,7 +125,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support String as a Property type" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val stringProp = IO(Input(Property[String]()))
     })
 
@@ -120,7 +135,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support String as a Property literal" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val propOut = IO(Output(Property[String]()))
       propOut := Property("fubar")
     })
@@ -131,7 +146,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support Boolean as a Property type" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val boolProp = IO(Input(Property[Boolean]()))
     })
 
@@ -141,7 +156,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support Boolean as a Property literal" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val propOut = IO(Output(Property[Boolean]()))
       propOut := Property(false)
     })
@@ -152,7 +167,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support paths as a Property type" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val pathProp = IO(Input(Property[Path]()))
     })
 
@@ -162,7 +177,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support path as a Property literal" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val propOutA = IO(Output(Property[Path]()))
       val propOutB = IO(Output(Property[Path]()))
       val propOutC = IO(Output(Property[Path]()))
@@ -194,14 +209,14 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
       val bar = Module(new Bar)
     }
 
-    val chirrtl = ChiselStage.emitCHIRRTL(new Foo)
+    val chirrtl = emitCHIRRTLAndGenSV(new Foo)
     matchesAndOmits(chirrtl)(
       "output a : Integer"
     )()
   }
 
   it should "support connecting Property types of the same type" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val propIn = IO(Input(Property[Int]()))
       val propOut = IO(Output(Property[Int]()))
       propOut := propIn
@@ -221,7 +236,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support Seq[Int], Vector[Int], and List[Int] as a Property type" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val seqProp1 = IO(Input(Property[Seq[Int]]()))
       val seqProp2 = IO(Input(Property[Vector[Int]]()))
       val seqProp3 = IO(Input(Property[List[Int]]()))
@@ -235,7 +250,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support nested Seqs as a Property type" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val nestedSeqProp = IO(Input(Property[Seq[Seq[Seq[Int]]]]()))
     })
 
@@ -245,7 +260,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support Seq[BigInt] as Property values" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val propOut = IO(Output(Property[Seq[BigInt]]()))
       propOut := Property(Seq[BigInt](123, 456)) // The Int => BigInt implicit conversion fails here
     })
@@ -256,7 +271,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support mixed Seqs of Integer literal and ports as Seq Property values" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val propIn = IO(Input(Property[BigInt]()))
       val propOut = IO(Output(Property[Seq[BigInt]]()))
       // Use connectable to show that Property[Seq[Property[A]]]
@@ -269,7 +284,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support SeqMap[Int], VectorMap[Int], and ListMap[Int] as a Property type" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val mapProp1 = IO(Input(Property[SeqMap[String, Int]]()))
       val mapProp2 = IO(Input(Property[VectorMap[String, Int]]()))
       val mapProp3 = IO(Input(Property[ListMap[String, Int]]()))
@@ -283,7 +298,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support nested Maps as a Property type" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val nestedMapProp = IO(Input(Property[SeqMap[String, SeqMap[String, SeqMap[String, Int]]]]()))
     })
 
@@ -293,7 +308,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support SeqMap[String, BigInt] as Property values" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val propOut = IO(Output(Property[SeqMap[String, BigInt]]()))
       propOut := Property(
         SeqMap[String, BigInt]("foo" -> 123, "bar" -> 456)
@@ -306,7 +321,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support mixed Maps of Integer literal and ports as Map Property values" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val propIn = IO(Input(Property[BigInt]()))
       val propOut = IO(Output(Property[SeqMap[String, BigInt]]()))
       propOut := Property(SeqMap("foo" -> propIn, "bar" -> Property(BigInt(123))))
@@ -361,7 +376,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support nested collections without nested Property[_] values" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val a = IO(Output(Property[Seq[SeqMap[String, Seq[Property[Int]]]]]()))
       val b = IO(Output(Property[Seq[SeqMap[String, Property[Seq[Int]]]]]()))
       val c = IO(Output(Property[Seq[Property[SeqMap[String, Seq[Int]]]]]()))
@@ -401,7 +416,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
       val foo = UInt(8.W)
       val bar = Property[BigInt]()
     }
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val propOut = IO(Output(new MyBundle))
       propOut.foo := 123.U
       propOut.bar := Property(3)
@@ -418,7 +433,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
       val foo = UInt(8.W)
       val bar = Flipped(Property[BigInt]())
     }
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val aligned = IO(new MyBundle)
       val flipped = IO(Flipped(new MyBundle))
       aligned.foo := flipped.foo
@@ -441,7 +456,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
       val aligned = IO(new MyBundle)
       val flipped = IO(Flipped(new MyBundle))
     }
-    val chirrtl1 = ChiselStage.emitCHIRRTL(new MyBaseModule {
+    val chirrtl1 = emitCHIRRTLAndGenSV(new MyBaseModule {
       aligned :<>= flipped
     })
     matchesAndOmits(chirrtl1)(
@@ -451,7 +466,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
       "propassign aligned.foo, flipped.foo"
     )()
 
-    val chirrtl2 = ChiselStage.emitCHIRRTL(new MyBaseModule {
+    val chirrtl2 = emitCHIRRTLAndGenSV(new MyBaseModule {
       aligned :<= flipped
     })
     matchesAndOmits(chirrtl2)(
@@ -460,7 +475,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
       "propassign aligned.foo, flipped.foo"
     )("propassign flipped.bar, aligned.bar")
 
-    val chirrtl3 = ChiselStage.emitCHIRRTL(new MyBaseModule {
+    val chirrtl3 = emitCHIRRTLAndGenSV(new MyBaseModule {
       aligned :>= flipped
     })
     matchesAndOmits(chirrtl3)(
@@ -469,7 +484,7 @@ class PropertySpec extends ChiselFlatSpec with MatchesAndOmits {
       "propassign flipped.bar, aligned.bar"
     )("propassign aligned.foo, flipped.foo")
 
-    val chirrtl4 = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl4 = emitCHIRRTLAndGenSV(new RawModule {
       val out = IO(Output(new MyBundle))
       val in = IO(Input(new MyBundle))
       out :#= in
