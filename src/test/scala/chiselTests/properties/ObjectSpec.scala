@@ -11,8 +11,23 @@ import circt.stage.ChiselStage
 class ObjectSpec extends ChiselFlatSpec with MatchesAndOmits {
   behavior.of("DynamicObject")
 
+  // Generate CHIRRTL for inspection, and check SV generation.
+  def emitCHIRRTLAndGenSV(gen: => RawModule, exc: Option[String] = None): String = {
+    val chirrtl = ChiselStage.emitCHIRRTL(gen)
+    exc match {
+      case None => ChiselStage.emitSystemVerilog(gen)
+      case Some(msg) => {
+        val exception = intercept[RuntimeException] {
+          ChiselStage.emitSystemVerilog(gen)
+        }
+        exception.getMessage should include(msg)
+      }
+    }
+    chirrtl
+  }
+
   it should "support Objects in Class ports" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val cls = Definition(new Class {
         override def desiredName = "Test"
         val in = IO(Input(Property[Int]()))
@@ -36,7 +51,7 @@ class ObjectSpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support Objects in Module ports" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val cls = Definition(new Class {
         override def desiredName = "Test"
         val in = IO(Input(Property[Int]()))
@@ -60,7 +75,7 @@ class ObjectSpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support output Object fields as sources" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val cls = Definition(new Class {
         override def desiredName = "Test"
         val out = IO(Output(Property[Int]()))
@@ -78,7 +93,7 @@ class ObjectSpec extends ChiselFlatSpec with MatchesAndOmits {
   }
 
   it should "support input Object fields as sinks" in {
-    val chirrtl = ChiselStage.emitCHIRRTL(new RawModule {
+    val chirrtl = emitCHIRRTLAndGenSV(new RawModule {
       val cls = Definition(new Class {
         override def desiredName = "Test"
         val in = IO(Input(Property[Int]()))
