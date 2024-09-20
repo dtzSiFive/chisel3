@@ -33,7 +33,7 @@ object when {
   )(
     implicit sourceInfo: SourceInfo
   ): WhenContext = {
-    new WhenContext(sourceInfo, () => cond, block, 0, Nil)
+    new WhenContext(sourceInfo, () => cond, block, Nil)
   }
 
   /** Returns the current `when` condition
