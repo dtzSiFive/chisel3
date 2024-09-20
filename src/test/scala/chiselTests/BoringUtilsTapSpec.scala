@@ -59,7 +59,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
 
   // This test requires ability to identify what region to add commands to,
   // *after* building them.  This is not yet supported.
-  ignore should "work downwards from grandparent to grandchild through when" in {
+  it should "work downwards from grandparent to grandchild through when" in {
     class Bar extends RawModule {
       val internalWire = Wire(Bool())
     }
@@ -81,6 +81,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
       }
     }
     val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top)
+    println(chirrtl)
 
     // The define should be at the end of the when block.
     matchesAndOmits(chirrtl)(
