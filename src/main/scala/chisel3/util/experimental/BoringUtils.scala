@@ -255,13 +255,18 @@ object BoringUtils {
       }
     }
     def drill(source: A, path: Seq[BaseModule], connectionLocation: Seq[BaseModule], up: Boolean): A = {
+      println(path.zip(connectionLocation))
       path.zip(connectionLocation).foldLeft(source) {
+case x @ (rhs, (module, conLoc)) =>
+  println(s"rhs=${rhs}, module=${module}, conLoc=${conLoc}")
+  x match {
         case (rhs, (module, conLoc)) if (module.isFullyClosed) => boringError(module); DontCare.asInstanceOf[A]
         case (rhs, (module, _))
             if ((up || isDriveDone(rhs)) && module == path(0) && isPort(rhs) &&
               (!createProbe.nonEmpty || !createProbe.get.writable)) => {
           // When drilling from the original source, or driving to the sink, if it's already a port just return it.
           // As an exception, insist rwTaps are done from within the module and exported out.
+          println(s"re-using port ${rhs}")
           rhs
         }
         case (rhs, (module, conLoc)) =>
@@ -273,6 +278,8 @@ object BoringUtils {
             /** create a port, and drill up. */
             // if drilling down, don't drill Probe types
             val bore = if (up) module.createSecretIO(purePortType) else module.createSecretIO(Flipped(purePortTypeBase))
+            println(s"created port ${bore} in ${module}")
+            println(s"port parent: ${parent(bore)}")
             module.addSecretIO(bore)
             if (isDrive) {
               conLoc.asInstanceOf[RawModule].secretConnection(rhs, bore)
@@ -282,6 +289,7 @@ object BoringUtils {
             bore
           }
       }
+}
     }
 
     requireIsHardware(source)
