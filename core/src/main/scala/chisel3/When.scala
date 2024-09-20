@@ -73,6 +73,7 @@ private object Scope {
   }
 }
 
+
 /**  A WhenContext may represent a when, and elsewhen, or an
   *  otherwise. Since FIRRTL does not have an "elsif" statement,
   *  alternatives must be mapped to nested if-else statements inside

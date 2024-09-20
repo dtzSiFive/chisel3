@@ -42,6 +42,7 @@ private[chisel3] object binding {
     }
   }
 
+
   // Location refers to 'where' in the Module hierarchy this lives
   sealed trait Binding {
     def location: Option[BaseModule]

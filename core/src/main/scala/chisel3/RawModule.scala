@@ -84,24 +84,23 @@ abstract class RawModule extends BaseModule {
   //
   // RTL construction internals
   //
-  // Perhaps this should be an ArrayBuffer (or ArrayBuilder), but DefModule is public and has Seq[Command]
-  // so our best option is to share a single Seq datastructure with that
-  private val _commands = new VectorBuilder[Command]()
+  private val _body = new Block
 
   /** The current region to which commands will be added. */
-  private var _currentRegion = _commands
+  private var _currentRegion = _body
 
-  private[chisel3] def changeRegion(newRegion: VectorBuilder[Command]): Unit = {
+  private[chisel3] def changeRegion(newRegion: Block): Unit = {
     _currentRegion = newRegion
   }
 
-  private[chisel3] def withRegion[A](newRegion: VectorBuilder[Command])(thunk: => A): A = {
-    _currentRegion ++= stagedSecretCommands
+  private[chisel3] def withRegion[A](newRegion: Block)(thunk: => A): A = {
+    // TODO: ++= operator or something? or just make Block a typedef?
+    _currentRegion.commands ++= stagedSecretCommands
     stagedSecretCommands.clear()
     var oldRegion = _currentRegion
     changeRegion(newRegion)
     val result = thunk
-    _currentRegion ++= stagedSecretCommands
+    _currentRegion.commands ++= stagedSecretCommands
     stagedSecretCommands.clear()
     changeRegion(oldRegion)
     result
@@ -109,7 +108,7 @@ abstract class RawModule extends BaseModule {
 
   private[chisel3] def addCommand(c: Command): Unit = {
     require(!_closed, "Can't write to module after module close")
-    _currentRegion += c
+    _currentRegion.addCommand(c)
   }
   protected def getCommands: Seq[Command] = {
     require(_closed, "Can't get commands before module close")
@@ -219,7 +218,7 @@ abstract class RawModule extends BaseModule {
     // Generate IO invalidation commands to initialize outputs as unused,
     //  unless the client wants explicit control over their generation.
     val component =
-      DefModule(this, name, _isPublic, Builder.enabledLayers.toSeq, firrtlPorts, _commands.result())
+      DefModule(this, name, _isPublic, Builder.enabledLayers.toSeq, firrtlPorts, _body.commands.result())
 
     // Secret connections can be staged if user bored into children modules
     component.secretCommands ++= stagedSecretCommands
