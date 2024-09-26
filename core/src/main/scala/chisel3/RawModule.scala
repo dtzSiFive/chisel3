@@ -90,18 +90,15 @@ abstract class RawModule extends BaseModule {
   private var _currentRegion = _body
 
   private[chisel3] def changeRegion(newRegion: Block): Unit = {
+    _currentRegion.commands ++= stagedSecretCommands
+    stagedSecretCommands.clear()
     _currentRegion = newRegion
   }
 
   private[chisel3] def withRegion[A](newRegion: Block)(thunk: => A): A = {
-    // TODO: ++= operator or something? or just make Block a typedef?
-    _currentRegion.commands ++= stagedSecretCommands
-    stagedSecretCommands.clear()
     var oldRegion = _currentRegion
     changeRegion(newRegion)
     val result = thunk
-    _currentRegion.commands ++= stagedSecretCommands
-    stagedSecretCommands.clear()
     changeRegion(oldRegion)
     result
   }
