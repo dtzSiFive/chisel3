@@ -19,15 +19,6 @@ import chisel3.util.simpleClassName
 import chisel3.experimental.hierarchy.Hierarchy
 import scala.collection.immutable.VectorBuilder
 
-// TODO: extra info (sourceInfo, string, so on) for debug/diag?
-final class Block private[chisel3] {
-  val commands = new VectorBuilder[Command]()
-
-  private def addCommand(c: Command): Unit = {
-    commands += c
-  }
-}
-
 private[chisel3] trait ObjectModuleImpl {
 
   protected def _applyImpl[T <: BaseModule](bc: => T)(implicit sourceInfo: SourceInfo): T = {

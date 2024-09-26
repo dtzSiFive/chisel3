@@ -339,14 +339,20 @@ private[chisel3] object ir {
       extends Definition
   case class DefObject(sourceInfo: SourceInfo, id: HasId, className: String) extends Definition
 
+  final class Block private[chisel3] {
+    val commands = new VectorBuilder[Command]()
 
+    def addCommand(c: Command): Unit = {
+      commands += c
+    }
+  }
 
   class When(val sourceInfo: SourceInfo, val pred: Arg) extends Command {
-    val ifRegion = new VectorBuilder[Command]
-    private var _elseRegion: VectorBuilder[Command] = null
-    def elseRegion: VectorBuilder[Command] = {
+    val ifRegion = new Block
+    private var _elseRegion: Block = null
+    def elseRegion: Block = {
       if (_elseRegion == null) {
-        _elseRegion = new VectorBuilder[Command]
+        _elseRegion = new Block
       }
       _elseRegion
     }
@@ -358,8 +364,8 @@ private[chisel3] object ir {
         (
           when.sourceInfo,
           when.pred,
-          when.ifRegion.result(),
-          Option(when._elseRegion).fold(Seq.empty[Command])(_.result())
+          when.ifRegion.commands.result(),
+          Option(when._elseRegion).fold(Seq.empty[Command])(_.commands.result())
         )
       )
     }
@@ -388,12 +394,12 @@ private[chisel3] object ir {
     children:   Seq[Layer])
 
   class LayerBlock(val sourceInfo: SourceInfo, val layer: chisel3.layer.Layer) extends Command {
-    val region = new VectorBuilder[Command]
+    val region = new Block
   }
 
   object LayerBlock {
     def unapply(layerBlock: LayerBlock): Option[(SourceInfo, String, Seq[Command])] = {
-      Some((layerBlock.sourceInfo, layerBlock.layer.name, layerBlock.region.result()))
+      Some((layerBlock.sourceInfo, layerBlock.layer.name, layerBlock.region.commands.result()))
     }
   }
 

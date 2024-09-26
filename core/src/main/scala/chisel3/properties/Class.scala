@@ -8,7 +8,7 @@ import chisel3.experimental.{BaseModule, SourceInfo}
 import chisel3.experimental.hierarchy.{Definition, Instance, ModuleClone}
 import chisel3.internal.{throwException, Builder}
 import chisel3.internal.binding.{ClassBinding, OpBinding}
-import chisel3.internal.firrtl.ir.{Arg, Command, Component, DefClass, DefObject, ModuleIO, Port, PropAssign}
+import chisel3.internal.firrtl.ir.{Arg, Block, Command, Component, DefClass, DefObject, ModuleIO, Port, PropAssign}
 import chisel3.internal.firrtl.Converter
 
 import scala.collection.mutable.ArrayBuffer
@@ -67,7 +67,7 @@ class Class extends BaseModule {
     }
 
     // Save the Component.
-    _component = Some(DefClass(this, name, ports, body.commands.toSeq))
+    _component = Some(DefClass(this, name, ports, _body.commands.result()))
 
     // Return the Component.
     _component
@@ -89,10 +89,10 @@ class Class extends BaseModule {
 
   /** Internal state and logic to maintain a buffer of commands.
     */
-  private val body = new Block
+  private val _body = new Block
   private def addCommandImpl(c: Command): Unit = {
     require(!_closed, "Can't write to Class after close")
-    body.addCommand(c)
+    _body.addCommand(c)
   }
 }
 
