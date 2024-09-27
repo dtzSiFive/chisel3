@@ -464,7 +464,13 @@ package experimental {
 
       Builder.currentModule = Some(this)
       //Builder.whenStack = Nil
-      Builder.blockStack = Nil
+      println(s"bs=${blockStack} (_block=${_block}")
+      if (Builder.blockStack == Nil) {
+        println(s"this=${this}")
+      }
+      // require(Builder.blockStack != Nil, "bs is Nil")
+      //Builder.blockStack = Nil
+      //Builder.pushBlock(Builder.forcedUserModule._body)
       Builder.layerStack = layer.Layer.root :: Nil
     }
 
