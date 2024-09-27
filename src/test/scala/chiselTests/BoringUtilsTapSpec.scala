@@ -45,6 +45,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
       out := BoringUtils.tapAndRead(foo.bar.internalWire)
     }
     val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top)
+    println(chirrtl)
     matchesAndOmits(chirrtl)(
       "module Bar :",
       "output out_bore : Probe<UInt<1>>",
@@ -191,6 +192,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
       val foo = Module(new Foo(parentWire))
     }
     val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top)
+    println(chirrtl)
 
     // The connect should be at the end of the layerblock.
     matchesAndOmits(chirrtl)(
@@ -399,6 +401,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
         probe.define(outElem, outRWBundleProbe.x)
       }
     )
+    println(chirrtl)
     matchesAndOmits(chirrtl)(
       "wire b : { x : UInt<1>}",
       "define bore = rwprobe(b.x)",
@@ -429,6 +432,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
         probe.define(outElem, outRWVecProbe(1))
       }
     )
+    println(chirrtl)
     matchesAndOmits(chirrtl)(
       "wire b : UInt<1>[4]",
       "define bore = rwprobe(b[2])",
@@ -465,6 +469,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
       probe.define(outV_1_in, BoringUtils.rwTap(child.v(1).in))
     }
     val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Foo)
+    println(chirrtl)
     matchesAndOmits(chirrtl)(
       // Child
       "output v : { flip in : UInt<1>, out : UInt<1>}[2]",
@@ -593,6 +598,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
     }
 
     val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top(), Array("--full-stacktrace"))
+    println(chirrtl)
     matchesAndOmits(chirrtl)(
       "module Bar :",
       "output decoupledThing_bore : Probe<{ ready : UInt<1>, valid : UInt<1>, bits : UInt<1>}>",
@@ -622,6 +628,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
     }
 
     val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Foo, Array("--full-stacktrace"))
+    println(chirrtl)
 
     matchesAndOmits(chirrtl)(
       "module Bar :",

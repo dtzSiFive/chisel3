@@ -93,13 +93,14 @@ private[chisel3] object MonoConnect {
     * @return None if visible, Some(location of original when declaration)
     */
   def checkWhenVisibility(x: Data): Option[SourceInfo] = {
+    println(s"checkWhenVisibility(x = ${x}): topBinding=${x.topBinding}, cur=${Builder.currentModule}")
     x.topBinding match {
       case mp: MemoryPortBinding =>
         None // TODO (albert-magyar): remove this "bridge" for odd enable logic of current CHIRRTL memories
-      case pb @ PortBinding(enc, _) if Builder.currentModule.contains(enc) => None
-      case spb @ SecretPortBinding(enc, _) if Builder.currentModule.contains(enc) => None
-      case _ : PortBinding | _ : SecretPortBinding => None /* Skip all ports since doesn't work */
-      case cd: ConditionalDeclarable => cd.parentBlock.collect { case b: Block if !Builder.currentBlock.contains(b) => b.sourceInfo }
+      case pb @ PortBinding(enc, _) if Builder.currentModule.isEmpty || Builder.currentModule.contains(enc) => None
+      case spb @ SecretPortBinding(enc, _) if Builder.currentModule.isEmpty || Builder.currentModule.contains(enc) => None
+      case _ : PortBinding | _ : SecretPortBinding => println(s"topBinding=${x.topBinding}, currentModule=${Builder.currentModule}"); None /* Skip all ports since doesn't work */
+      case cd: ConditionalDeclarable => cd.parentBlock.collect { case b: Block if !Builder.currentBlock.contains(b) => require(Builder.currentBlock.isDefined, "no current block"); b.sourceInfo }
       case _ => None
     }
   }

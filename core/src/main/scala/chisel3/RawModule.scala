@@ -106,12 +106,12 @@ abstract class RawModule extends BaseModule {
 
   private[chisel3] def withRegion[A](newRegion: Block)(thunk: => A): A = {
     // var oldRegion = _currentRegion
-    _currentRegion.commands ++= stagedSecretCommands
-    stagedSecretCommands.clear()
+    //_currentRegion.commands ++= stagedSecretCommands
+    //stagedSecretCommands.clear()
     Builder.pushBlock(newRegion)
     val result = thunk
-    _currentRegion.commands ++= stagedSecretCommands
-    stagedSecretCommands.clear()
+    //_currentRegion.commands ++= stagedSecretCommands
+    //stagedSecretCommands.clear()
     Builder.popBlock()
     result
   }
@@ -231,12 +231,12 @@ abstract class RawModule extends BaseModule {
       DefModule(this, name, _isPublic, Builder.enabledLayers.toSeq, firrtlPorts, _body.commands.result())
 
     // Secret connections can be staged if user bored into children modules
-    component.secretCommands ++= stagedSecretCommands
-    stagedSecretCommands.clear()
+    //component.secretCommands ++= stagedSecretCommands
+    //stagedSecretCommands.clear()
     _component = Some(component)
     _component
   }
-  private[chisel3] val stagedSecretCommands = collection.mutable.ArrayBuffer[Command]()
+  // private[chisel3] val stagedSecretCommands = collection.mutable.ArrayBuffer[Command]()
 
   private[chisel3] def secretConnection(left: Data, _right: Data)(implicit si: SourceInfo): Unit = {
     val (right: Data, _) = chisel3.experimental.dataview
@@ -272,12 +272,15 @@ abstract class RawModule extends BaseModule {
     }
 
     val rhs = computeConnection(left, right)
-    val secretCommands = if (_closed) {
-      _component.get.asInstanceOf[DefModule].secretCommands
-    } else {
-      stagedSecretCommands
-    }
-    secretCommands += rhs
+    //require(!_closed, "must not be closed")
+    Builder.currentBlock.get.commands += rhs
+    //val secretCommands = if (_closed) {
+    //  _component.get.asInstanceOf[DefModule].secretCommands
+    //} else {
+    //  Builder.currentBlock.get.commands
+    //}
+    //secretCommands += rhs
+    //require(_closed || Builder.currentBlock.get.commands.result().contains(rhs), "failed to add")
   }
 
   private[chisel3] def initializeInParent(): Unit = {}

@@ -282,6 +282,10 @@ case x @ (rhs, (module, conLoc)) =>
 
             /** create a port, and drill up. */
             // if drilling down, don't drill Probe types
+            //Builder.pushBlock(module._block.get)
+            println(s"conLoc == module: ${conLoc == module}")
+            // val block = if (Builder.currentModule.isEmpty || Builder.currentModule.contains(conLoc)) Builder.currentBlock.get else module._block.get
+            def createAndConnect : A = {
             val bore = if (up) module.createSecretIO(purePortType) else module.createSecretIO(Flipped(purePortTypeBase))
             println(s"created port ${bore} in ${module}")
             println(s"port parent: ${parent(bore)}")
@@ -291,7 +295,12 @@ case x @ (rhs, (module, conLoc)) =>
             } else {
               conLoc.asInstanceOf[RawModule].secretConnection(bore, rhs)
             }
-            bore
+             bore
+            }
+            if (Builder.currentModule.isEmpty || Builder.currentModule.contains(conLoc) || Builder.currentBlock.contains(module._block)) 
+              createAndConnect
+            else
+              conLoc.asInstanceOf[RawModule].withRegion(module._block.get) { createAndConnect }
           }
       }
 }
@@ -405,7 +414,9 @@ case x @ (rhs, (module, conLoc)) =>
     val tapIntermediate = skipPrefix {
       boreOrTap(source, createProbe = Some(ProbeInfo(writable = false, color = None)))
     }
+    println(s"tapAndRead, after boreOrTap: ${tapIntermediate}")
     if (tapIntermediate.probeInfo.nonEmpty) {
+      println("read!")
       probe.read(tapIntermediate)
     } else {
       tapIntermediate
