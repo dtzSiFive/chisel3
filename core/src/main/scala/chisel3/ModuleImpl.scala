@@ -823,7 +823,8 @@ package experimental {
       Module.assignCompatDir(iodef)
 
       // TODO: revisit this!!
-      iodef.bind(PortBinding(this, /*block=*/None))
+      println(s"bindIOInPlace!! iodef=${iodef}")
+      iodef.bind(PortBinding(this, _block))
       _ports += iodef -> sourceInfo
     }
 
@@ -843,7 +844,7 @@ package experimental {
 
       Module.assignCompatDir(iodef)
       // TODO: revisit this!!
-      iodef.bind(SecretPortBinding(this, /*block=*/None), iodef.specifiedDirection)
+      iodef.bind(SecretPortBinding(this, _block), iodef.specifiedDirection)
       iodef
     }
 
