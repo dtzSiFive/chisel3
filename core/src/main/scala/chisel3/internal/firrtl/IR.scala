@@ -339,7 +339,7 @@ private[chisel3] object ir {
       extends Definition
   case class DefObject(sourceInfo: SourceInfo, id: HasId, className: String) extends Definition
 
-  class Block(val sourceInfo: SourceInfo/* = UnlocatableSourceInfo*/)  {
+  class Block(val sourceInfo: SourceInfo/* = UnlocatableSourceInfo*/, val owner: Option[Command])  {
     val commands = new VectorBuilder[Command]
 
     def addCommand(c: Command): Unit = {
@@ -354,11 +354,11 @@ private[chisel3] object ir {
   }
 
   class When(val sourceInfo: SourceInfo, val pred: Arg) extends Command {
-    val ifRegion = new Block(sourceInfo)
+    val ifRegion = new Block(sourceInfo, Some(this))
     private var _elseRegion: Block = null
     def elseRegion: Block = {
       if (_elseRegion == null) {
-        _elseRegion = new Block(sourceInfo)
+        _elseRegion = new Block(sourceInfo, Some(this))
       }
       _elseRegion
     }
@@ -400,7 +400,7 @@ private[chisel3] object ir {
     children:   Seq[Layer])
 
   class LayerBlock(val sourceInfo: SourceInfo, val layer: chisel3.layer.Layer) extends Command {
-    val region = new Block(sourceInfo)
+    val region = new Block(sourceInfo, Some(this))
   }
 
   object LayerBlock {

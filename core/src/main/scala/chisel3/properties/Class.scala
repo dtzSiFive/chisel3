@@ -89,7 +89,7 @@ class Class extends BaseModule {
 
   /** Internal state and logic to maintain a buffer of commands.
     */
-  private val _body = new Block(UnlocatableSourceInfo)
+  private val _body = new Block(UnlocatableSourceInfo, None /* object command! */)
   private def addCommandImpl(c: Command): Unit = {
     require(!_closed, "Can't write to Class after close")
     _body.addCommand(c)
