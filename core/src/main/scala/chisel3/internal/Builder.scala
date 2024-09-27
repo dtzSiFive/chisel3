@@ -805,6 +805,15 @@ private[chisel3] object Builder extends LazyLogging {
   }
 
   def blockDepth : Int = dynamicContext.blockStack.length
+  def pushBlock(b: Block): Unit = {
+    dynamicContext.blockStack = b :: dynamicContext.blockStack
+  }
+
+  def popBlock(): Block = {
+    val lastBlock = dynamicContext.blockStack.head
+    dynamicContext.blockStack = dynamicContext.blockStack.tail
+    lastBlock
+  }
 
   def currentBlock: Option[Block] = dynamicContext.blockStack.headOption
 

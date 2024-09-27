@@ -85,21 +85,34 @@ abstract class RawModule extends BaseModule {
   // RTL construction internals
   //
   private val _body = new Block(UnlocatableSourceInfo, None /* instance command?*/)
+  println("RawModule, resetting block stack...")
+  Builder.blockStack = Nil
+  println(s"pushing body ${_body} for this=${this}")
+  Builder.pushBlock(_body)
 
   /** The current region to which commands will be added. */
-  private var _currentRegion = _body
+  private def _currentRegion = {
+    require(Builder.currentBlock.isDefined, "must be have block set")
+    Builder.currentBlock.get
+  }
 
+/*
   private[chisel3] def changeRegion(newRegion: Block): Unit = {
     _currentRegion.commands ++= stagedSecretCommands
     stagedSecretCommands.clear()
     _currentRegion = newRegion
   }
+*/
 
   private[chisel3] def withRegion[A](newRegion: Block)(thunk: => A): A = {
-    var oldRegion = _currentRegion
-    changeRegion(newRegion)
+    // var oldRegion = _currentRegion
+    _currentRegion.commands ++= stagedSecretCommands
+    stagedSecretCommands.clear()
+    Builder.pushBlock(newRegion)
     val result = thunk
-    changeRegion(oldRegion)
+    _currentRegion.commands ++= stagedSecretCommands
+    stagedSecretCommands.clear()
+    Builder.popBlock()
     result
   }
 
