@@ -84,7 +84,7 @@ abstract class RawModule extends BaseModule {
   //
   // RTL construction internals
   //
-  private val _body = new Block
+  private val _body = new Block(UnlocatableSourceInfo)
 
   /** The current region to which commands will be added. */
   private var _currentRegion = _body

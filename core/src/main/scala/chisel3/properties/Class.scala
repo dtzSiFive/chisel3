@@ -4,7 +4,7 @@ package chisel3.properties
 
 import firrtl.{ir => fir}
 import chisel3.{Data, RawModule, SpecifiedDirection}
-import chisel3.experimental.{BaseModule, SourceInfo}
+import chisel3.experimental.{BaseModule, SourceInfo, UnlocatableSourceInfo}
 import chisel3.experimental.hierarchy.{Definition, Instance, ModuleClone}
 import chisel3.internal.{throwException, Builder}
 import chisel3.internal.binding.{ClassBinding, OpBinding}
@@ -89,7 +89,7 @@ class Class extends BaseModule {
 
   /** Internal state and logic to maintain a buffer of commands.
     */
-  private val _body = new Block
+  private val _body = new Block(UnlocatableSourceInfo)
   private def addCommandImpl(c: Command): Unit = {
     require(!_closed, "Can't write to Class after close")
     _body.addCommand(c)
