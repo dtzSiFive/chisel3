@@ -241,7 +241,7 @@ object BoringUtils {
       case None => purePortTypeBase
     }
     def isPort(d: Data): Boolean = d.topBindingOpt match {
-      case Some(PortBinding(_)) => true
+      case Some(PortBinding(_, _)) => true
       case _                    => false
     }
     def isDriveDone(d: Data): Boolean = {
