@@ -50,13 +50,13 @@ object when {
     * }
     * }}}
     */
-  def cond: Bool = {
-    implicit val sourceInfo = UnlocatableSourceInfo
-    val whens = Builder.whenStack
-    whens.foldRight(true.B) {
-      case (ctx, acc) => acc && ctx.localCond
-    }
-  }
+  //def cond: Bool = {
+  //  implicit val sourceInfo = UnlocatableSourceInfo
+  //  val whens = Builder.whenStack
+  //  whens.foldRight(true.B) {
+  //    case (ctx, acc) => acc && ctx.localCond
+  //  }
+  //}
 }
 
 private object Scope {
@@ -136,13 +136,13 @@ final class WhenContext private[chisel3] (
     * place.
     */
   def otherwise(block: => Any)(implicit sourceInfo: SourceInfo): Unit = {
-    Builder.pushWhen(this)
+    //Builder.pushWhen(this)
     scope = Some(Scope.Else)
     Builder.forcedUserModule.withRegion(whenCommand.elseRegion) {
       block
     }
     scope = None
-    Builder.popWhen()
+    //Builder.popWhen()
   }
 
   /** Return true if this `WhenContext` is currently constructing operations. */
@@ -152,7 +152,7 @@ final class WhenContext private[chisel3] (
   // `ifRegion`.  Any commands that this thunk creates will be put inside this
   // block.
   private val whenCommand = pushCommand(new When(sourceInfo, cond().ref))
-  Builder.pushWhen(this)
+  //Builder.pushWhen(this)
   scope = Some(Scope.If)
   try {
     Builder.forcedUserModule.withRegion(whenCommand.ifRegion) {
@@ -166,5 +166,5 @@ final class WhenContext private[chisel3] (
       )
   }
   scope = None
-  Builder.popWhen()
+  //Builder.popWhen()
 }

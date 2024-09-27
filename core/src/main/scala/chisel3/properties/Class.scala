@@ -177,7 +177,7 @@ object Class {
     contextMod match {
       case rm: RawModule => {
         rm.addCommand(DefObject(sourceInfo, obj, obj.className.name))
-        classProp.bind(OpBinding(rm, Builder.currentWhen), SpecifiedDirection.Unspecified)
+        classProp.bind(OpBinding(rm, Builder.currentBlock), SpecifiedDirection.Unspecified)
       }
       case cls: Class => {
         cls.addCommand(DefObject(sourceInfo, obj, obj.className.name))
@@ -252,7 +252,7 @@ object Class {
       val contextMod = Builder.referenceUserContainer
       contextMod match {
         case rm: RawModule => {
-          ref.bind(OpBinding(rm, Builder.currentWhen), SpecifiedDirection.Unspecified)
+          ref.bind(OpBinding(rm, Builder.currentBlock), SpecifiedDirection.Unspecified)
         }
         case cls: Class => {
           ref.bind(ClassBinding(cls), SpecifiedDirection.Unspecified)

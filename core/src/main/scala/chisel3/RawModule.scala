@@ -168,7 +168,7 @@ abstract class RawModule extends BaseModule {
             id.forceName(default = "_T", _namespace)
           case MemoryPortBinding(_, _) =>
             id.forceName(default = "MPORT", _namespace)
-          case PortBinding(_) =>
+          case PortBinding(_, _) =>
             id.forceName(default = "PORT", _namespace, true, x => ModuleIO(this, x))
           case RegBinding(_, _) =>
             id.forceName(default = "REG", _namespace)

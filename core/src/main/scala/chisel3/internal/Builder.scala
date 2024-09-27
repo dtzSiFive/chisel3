@@ -122,6 +122,12 @@ private[chisel3] trait HasId extends chisel3.InstanceId {
     _parentVar = target.getOrElse(null)
   }
 
+  private var _blockVar:       Block = Builder.currentBlock.getOrElse(null)
+  private[chisel3] def _block: Option[Block] = Option(_blockVar)
+  private[chisel3] def _block_=(target: Option[Block]): Unit = {
+    _blockVar = target.getOrElse(null)
+  }
+
   private[chisel3] val _id: Long = Builder.idGen.next
 
   // TODO: remove this, but its removal seems to cause a nasty Scala compiler crash.
@@ -547,6 +553,7 @@ private[chisel3] class DynamicContext(
   // Used to distinguish between no Module() wrapping, multiple wrappings, and rewrapping
   var readyForModuleConstr: Boolean = false
   var whenStack:            List[WhenContext] = Nil
+  var blockStack:           List[Block] = Nil
   // Clock and Reset are "Delayed" because ImplicitClock and ImplicitReset need to set these values,
   // But the clock or reset defined by the user won't yet be initialized
   var currentClock:     Option[Delayed[Clock]] = None
@@ -669,8 +676,8 @@ private[chisel3] object Builder extends LazyLogging {
             getSubName(data).map(p + "_" + _).getOrElse(p)
           }
         case SampleElementBinding(parent)                            => recData(parent)
-        case PortBinding(mod) if Builder.currentModule.contains(mod) => data.seedOpt
-        case PortBinding(mod)                                        => map2(mod.seedOpt, data.seedOpt)(_ + "_" + _)
+        case PortBinding(mod, _) if Builder.currentModule.contains(mod) => data.seedOpt
+        case PortBinding(mod, _)                                        => map2(mod.seedOpt, data.seedOpt)(_ + "_" + _)
         case (_: LitBinding | _: DontCareBinding) => None
         case _ => Some("view_") // TODO implement
       }
@@ -770,24 +777,35 @@ private[chisel3] object Builder extends LazyLogging {
     dynamicContext.readyForModuleConstr = target
   }
 
-  def whenDepth: Int = dynamicContext.whenStack.length
+  //def whenDepth: Int = dynamicContext.whenStack.length
 
-  def pushWhen(wc: WhenContext): Unit = {
-    dynamicContext.whenStack = wc :: dynamicContext.whenStack
+  //def pushWhen(wc: WhenContext): Unit = {
+  //  dynamicContext.whenStack = wc :: dynamicContext.whenStack
+  //}
+
+  //def popWhen(): WhenContext = {
+  //  val lastWhen = dynamicContext.whenStack.head
+  //  dynamicContext.whenStack = dynamicContext.whenStack.tail
+  //  lastWhen
+  //}
+
+  //def whenStack: List[WhenContext] = dynamicContext.whenStack
+  //def whenStack_=(s: List[WhenContext]): Unit = {
+  //  dynamicContext.whenStack = s
+  //}
+
+  //def currentWhen: Option[WhenContext] = dynamicContext.whenStack.headOption
+
+  def blockStack : List[Block] = dynamicContext.blockStack
+  def blockStack_=(s: List[Block]): Unit = {
+    dynamicContext.blockStack = s
   }
 
-  def popWhen(): WhenContext = {
-    val lastWhen = dynamicContext.whenStack.head
-    dynamicContext.whenStack = dynamicContext.whenStack.tail
-    lastWhen
-  }
+  def blockDepth : Int = dynamicContext.blockStack.length
 
-  def whenStack: List[WhenContext] = dynamicContext.whenStack
-  def whenStack_=(s: List[WhenContext]): Unit = {
-    dynamicContext.whenStack = s
-  }
+  def currentBlock: Option[Block] = dynamicContext.blockStack.headOption
 
-  def currentWhen: Option[WhenContext] = dynamicContext.whenStack.headOption
+  //def currentWhen: Option[WhenContext] = dynamicContext.whenStack.headOption
 
   // Helper for reasonable errors when clock or reset value not yet initialized
   private def getDelayed[A](field: String, dc: Delayed[A]): A = {
@@ -866,7 +884,7 @@ private[chisel3] object Builder extends LazyLogging {
   }
   def pushOp[T <: Data](cmd: DefPrim[T]): T = {
     // Bind each element of the returned Data to being a Op
-    cmd.id.bind(OpBinding(forcedUserModule, currentWhen))
+    cmd.id.bind(OpBinding(forcedUserModule, currentBlock))
     pushCommand(cmd).id
   }
 

@@ -60,7 +60,7 @@ private[chisel3] trait ObjectModuleImpl {
     Builder.readyForModuleConstr = true
 
     val parent = Builder.currentModule
-    val parentWhenStack = Builder.whenStack
+    val parentBlockStack = Builder.blockStack
     val parentLayerStack = Builder.layerStack
 
     // Save then clear clock and reset to prevent leaking scope, must be set again in the Module
@@ -79,13 +79,13 @@ private[chisel3] trait ObjectModuleImpl {
     // Execute the module, this has the following side effects:
     //   - set currentModule
     //   - unset readyForModuleConstr
-    //   - reset whenStack to be empty
+    //   - reset blockStack to be empty
     //   - reset layerStack to be root :: nil
     //   - set currentClockAndReset
     val module: T = bc // bc is actually evaluated here
 
-    if (Builder.whenDepth != 0) {
-      throwException("Internal Error! when() scope depth is != 0, this should have been caught!")
+    if (Builder.blockDepth != 0) {
+      throwException("Internal Error! block scope depth is != 0, this should have been caught!")
     }
     if (Builder.readyForModuleConstr) {
       throwException(
@@ -104,7 +104,7 @@ private[chisel3] trait ObjectModuleImpl {
     // Reset Builder state *after* generating the component, so any atModuleBodyEnd generators are still within the
     // scope of the current Module.
     Builder.currentModule = parent // Back to parent!
-    Builder.whenStack = parentWhenStack
+    Builder.blockStack = parentBlockStack
     Builder.layerStack = parentLayerStack
     Builder.currentClock = saveClock // Back to clock and reset scope
     Builder.currentReset = saveReset
@@ -373,7 +373,7 @@ package internal {
       // does not recursively copy the right specifiedDirection,
       // still need to fix it up here.
       Module.assignCompatDir(clonePorts)
-      clonePorts.bind(PortBinding(cloneParent))
+      clonePorts.bind(PortBinding(cloneParent, /*block=*/None))
       clonePorts.setAllParents(Some(cloneParent))
       cloneParent._portsRecord = clonePorts
       if (proto.isInstanceOf[Module]) {
@@ -463,7 +463,8 @@ package experimental {
       readyForModuleConstr = false
 
       Builder.currentModule = Some(this)
-      Builder.whenStack = Nil
+      //Builder.whenStack = Nil
+      Builder.blockStack = Nil
       Builder.layerStack = layer.Layer.root :: Nil
     }
 
@@ -804,7 +805,8 @@ package experimental {
       // Assign any signals (Chisel or chisel3) with Unspecified/Flipped directions to Output/Input.
       Module.assignCompatDir(iodef)
 
-      iodef.bind(PortBinding(this))
+      // TODO: revisit this!!
+      iodef.bind(PortBinding(this, /*block=*/None))
       _ports += iodef -> sourceInfo
     }
 
@@ -823,7 +825,8 @@ package experimental {
       require(!isFullyClosed, "Cannot create secret ports if module is fully closed")
 
       Module.assignCompatDir(iodef)
-      iodef.bind(SecretPortBinding(this), iodef.specifiedDirection)
+      // TODO: revisit this!!
+      iodef.bind(SecretPortBinding(this, /*block=*/None), iodef.specifiedDirection)
       iodef
     }
 

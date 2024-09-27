@@ -7,7 +7,7 @@ import chisel3._
 import chisel3.experimental.{Analog, BaseModule, SourceInfo}
 import chisel3.internal.binding._
 import chisel3.internal.Builder.pushCommand
-import chisel3.internal.firrtl.ir.{Connect, DefInvalid, ProbeDefine, PropAssign}
+import chisel3.internal.firrtl.ir.{Block, Connect, DefInvalid, ProbeDefine, PropAssign}
 import chisel3.internal.firrtl.Converter
 import chisel3.experimental.dataview.{isView, reify, reifyIdentityView}
 import chisel3.properties.{Class, Property}
@@ -96,7 +96,7 @@ private[chisel3] object MonoConnect {
     x.topBinding match {
       case mp: MemoryPortBinding =>
         None // TODO (albert-magyar): remove this "bridge" for odd enable logic of current CHIRRTL memories
-      case cd: ConditionalDeclarable => cd.visibility.collect { case wc: WhenContext if !wc.active => wc.sourceInfo }
+      case cd: ConditionalDeclarable => cd.parentBlock.collect { case b: Block if !Builder.currentBlock.contains(b) => b.sourceInfo }
       case _ => None
     }
   }
@@ -275,11 +275,11 @@ private[chisel3] object MonoConnect {
     val context_mod_opt = Some(context_mod)
 
     val sink_is_port = sink.topBinding match {
-      case PortBinding(_) => true
+      case PortBinding(_, _) => true
       case _              => false
     }
     val source_is_port = source.topBinding match {
-      case PortBinding(_) => true
+      case PortBinding(_, _) => true
       case _              => false
     }
 
@@ -372,7 +372,7 @@ private[chisel3] object MonoConnect {
     val traceFlipped = ((flipped ^ currentlyFlipped) || coercedFlip) && (!coercedAlign)
     data.binding.get match {
       case ChildBinding(parent) => traceFlow(wantToBeSink, traceFlipped, parent, context_mod)
-      case PortBinding(enclosure) =>
+      case PortBinding(enclosure, _) =>
         val childPort = enclosure != context_mod
         wantToBeSink ^ childPort ^ traceFlipped
       case _ => true

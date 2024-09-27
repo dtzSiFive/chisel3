@@ -4,7 +4,7 @@ package chisel3.internal
 
 import chisel3._
 import chisel3.experimental.{BaseModule, SourceInfo}
-import chisel3.internal.firrtl.ir.{LitArg, PropertyLit}
+import chisel3.internal.firrtl.ir.{Block, LitArg, PropertyLit}
 import chisel3.properties.Class
 
 import scala.collection.immutable.VectorMap
@@ -67,30 +67,30 @@ private[chisel3] object binding {
 
   // A component that can potentially be declared inside a 'when'
   sealed trait ConditionalDeclarable extends TopBinding {
-    def visibility: Option[WhenContext]
+    def parentBlock: Option[Block]
   }
 
   // TODO(twigg): Ops between unenclosed nodes can also be unenclosed
   // However, Chisel currently binds all op results to a module
-  case class PortBinding(enclosure: BaseModule, visibility: Option[WhenContext]) extends ConstrainedBinding with ConditionalDeclarable
+  case class PortBinding(enclosure: BaseModule, parentBlock: Option[Block]) extends ConstrainedBinding with ConditionalDeclarable
 
   // Added to handle BoringUtils in Chisel
-  case class SecretPortBinding(enclosure: BaseModule, visibility: Option[WhenContext]) extends ConstrainedBinding with ConditionalDeclarable
+  case class SecretPortBinding(enclosure: BaseModule, parentBlock: Option[Block]) extends ConstrainedBinding with ConditionalDeclarable
 
-  case class OpBinding(enclosure: RawModule, visibility: Option[WhenContext])
+  case class OpBinding(enclosure: RawModule, parentBlock: Option[Block])
       extends ConstrainedBinding
       with ReadOnlyBinding
       with ConditionalDeclarable
-  case class MemoryPortBinding(enclosure: RawModule, visibility: Option[WhenContext])
+  case class MemoryPortBinding(enclosure: RawModule, parentBlock: Option[Block])
       extends ConstrainedBinding
       with ConditionalDeclarable
-  case class SramPortBinding(enclosure: RawModule, visibility: Option[WhenContext])
+  case class SramPortBinding(enclosure: RawModule, parentBlock: Option[Block])
       extends ConstrainedBinding
       with ConditionalDeclarable
-  case class RegBinding(enclosure: RawModule, visibility: Option[WhenContext])
+  case class RegBinding(enclosure: RawModule, parentBlock: Option[Block])
       extends ConstrainedBinding
       with ConditionalDeclarable
-  case class WireBinding(enclosure: RawModule, visibility: Option[WhenContext])
+  case class WireBinding(enclosure: RawModule, parentBlock: Option[Block])
       extends ConstrainedBinding
       with ConditionalDeclarable
 
@@ -171,8 +171,8 @@ private[chisel3] object binding {
   // Views currently only support 1:1 Element-level mappings
   case class ViewBinding(target: Element, writability: ViewWriteability) extends Binding with ConditionalDeclarable {
     def location: Option[BaseModule] = target.binding.flatMap(_.location)
-    def visibility: Option[WhenContext] = target.binding.flatMap {
-      case c: ConditionalDeclarable => c.visibility
+    def parentBlock : Option[Block] = target.binding.flatMap {
+      case c: ConditionalDeclarable => c.parentBlock
       case _ => None
     }
   }
@@ -219,9 +219,9 @@ private[chisel3] object binding {
       if (locations.size == 1) Some(locations.head)
       else None
     }
-    lazy val visibility: Option[WhenContext] = {
+    lazy val parentBlock: Option[Block] = {
       val contexts = childMap.values.view
-        .flatMap(_.binding.toSeq.collect { case c: ConditionalDeclarable => c.visibility }.flatten)
+        .flatMap(_.binding.toSeq.collect { case c: ConditionalDeclarable => c.parentBlock }.flatten)
         .toVector
         .distinct
       if (contexts.size == 1) Some(contexts.head)

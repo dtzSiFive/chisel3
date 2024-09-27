@@ -339,11 +339,18 @@ private[chisel3] object ir {
       extends Definition
   case class DefObject(sourceInfo: SourceInfo, id: HasId, className: String) extends Definition
 
-  final class Block private[chisel3] {
+  private[chisel3]
+  final class Block(implicit val sourceInfo: SourceInfo = UnlocatableSourceInfo)  {
     val commands = new VectorBuilder[Command]()
 
     def addCommand(c: Command): Unit = {
       commands += c
+    }
+  }
+
+  object Block {
+    def unapply(block: Block): Option[(Seq[Command], SourceInfo)] = {
+      Some((block.commands.result(), block.sourceInfo))
     }
   }
 

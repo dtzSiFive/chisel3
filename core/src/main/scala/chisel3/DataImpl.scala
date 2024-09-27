@@ -364,7 +364,7 @@ private[chisel3] trait DataImpl extends HasId with NamedComponent { self: Data =
   override def autoSeed(name: String): this.type = {
     topBindingOpt match {
       // Ports are special in that the autoSeed will keep the first name, not the last name
-      case Some(PortBinding(m)) if hasSeed && Builder.currentModule.contains(m) => this
+      case Some(PortBinding(m, _)) if hasSeed && Builder.currentModule.contains(m) => this
       case _                                                                    => super.autoSeed(name)
     }
   }
@@ -492,8 +492,8 @@ private[chisel3] trait DataImpl extends HasId with NamedComponent { self: Data =
     topBindingOpt match {
       case OpBinding(_, _)           => "OpResult"
       case MemoryPortBinding(_, _)   => "MemPort"
-      case PortBinding(_)            => "IO"
-      case SecretPortBinding(_)      => "IO"
+      case PortBinding(_, _)            => "IO"
+      case SecretPortBinding(_, _)      => "IO"
       case RegBinding(_, _)          => "Reg"
       case WireBinding(_, _)         => "Wire"
       case DontCareBinding()         => "(DontCare)"
@@ -1074,7 +1074,7 @@ trait WireFactory {
     val x = if (!t.mustClone(prevId)) t else t.cloneTypeFull
 
     // Bind each element of x to being a Wire
-    x.bind(WireBinding(Builder.forcedUserModule, Builder.currentWhen))
+    x.bind(WireBinding(Builder.forcedUserModule, Builder.currentBlock))
 
     pushCommand(DefWire(sourceInfo, x))
 
