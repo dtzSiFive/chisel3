@@ -10,6 +10,7 @@ import chisel3.experimental.{annotate, requireIsHardware, skipPrefix, BaseModule
 import chisel3.internal.{Builder, BuilderContextCache, NamedComponent, Namespace}
 import chisel3.internal.binding.{CrossModuleBinding, PortBinding, ConditionalDeclarable}
 import firrtl.transforms.{DontTouchAnnotation, NoDedupAnnotation}
+import chisel3.internal.firrtl.ir.Block
 import firrtl.passes.wiring.{SinkAnnotation, SourceAnnotation}
 import firrtl.annotations.{ComponentName, ModuleName}
 
@@ -227,6 +228,7 @@ object BoringUtils {
     implicit si: SourceInfo
   ): A = {
     def parent(d: Data): BaseModule = d.topBinding.location.get
+    //def parentBlock(d: Data) = d.topBindingOpt.asInstanceOf[ConditionalDeclarable].parentBlock
     def purePortTypeBase = if (createProbe.nonEmpty) Output(chiselTypeOf(source))
     else if (DataMirror.hasOuterFlip(source)) Flipped(chiselTypeOf(source))
     else chiselTypeOf(source)
@@ -297,14 +299,19 @@ case x @ (rhs, (module, conLoc)) =>
             }
              bore
             }
-            if (Builder.currentModule.isEmpty || Builder.currentModule.contains(conLoc)/* || Builder.currentBlock.contains(module._block)*/) {
-              println("---------- direct createAndConnect")
-              createAndConnect
-            }
-            else {
-              println("---------- placement createAndConnect")
-              conLoc.asInstanceOf[RawModule].withRegion(if (conLoc == module) module.asInstanceOf[RawModule]._body else module._block.get) { createAndConnect }
-            }
+            createAndConnect
+     //       if (Builder.currentModule.isEmpty || Builder.currentModule.contains(conLoc)/* || Builder.currentBlock.contains(module._block)*/) {
+     //         println("---------- direct createAndConnect")
+     //         createAndConnect
+     //       }
+     //       else {
+     //         println("---------- placement createAndConnect")
+//   //           conLoc.asInstanceOf[RawModule].withRegion((up, conLoc == module) match {
+//cas//e (true, 
+//if //(up) (if (conLoc == module) module.asInstanceOf[RawModule]._body else module._block.get
+//}))// { createAndConnect }
+     //           createAndConnect
+     //       }
           }
       }
 }

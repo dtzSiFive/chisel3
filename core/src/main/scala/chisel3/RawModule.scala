@@ -239,6 +239,11 @@ abstract class RawModule extends BaseModule {
   // private[chisel3] val stagedSecretCommands = collection.mutable.ArrayBuffer[Command]()
 
   private[chisel3] def secretConnection(left: Data, _right: Data)(implicit si: SourceInfo): Unit = {
+
+    // Okay, where to put the new command?
+    // Trust user that somewhere in this module makes sense.
+    // Need both left and right to be visible.
+
     val (right: Data, _) = chisel3.experimental.dataview
       .reifyIdentityView(_right)
       .getOrElse(
