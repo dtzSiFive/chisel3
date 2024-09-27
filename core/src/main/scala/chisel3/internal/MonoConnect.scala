@@ -96,6 +96,9 @@ private[chisel3] object MonoConnect {
     x.topBinding match {
       case mp: MemoryPortBinding =>
         None // TODO (albert-magyar): remove this "bridge" for odd enable logic of current CHIRRTL memories
+      case pb @ PortBinding(enc, _) if Builder.currentModule.contains(enc) => None
+      case spb @ SecretPortBinding(enc, _) if Builder.currentModule.contains(enc) => None
+      case _ : PortBinding | _ : SecretPortBinding => None /* Skip all ports since doesn't work */
       case cd: ConditionalDeclarable => cd.parentBlock.collect { case b: Block if !Builder.currentBlock.contains(b) => b.sourceInfo }
       case _ => None
     }
