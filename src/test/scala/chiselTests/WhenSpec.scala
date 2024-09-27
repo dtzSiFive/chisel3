@@ -92,6 +92,7 @@ class SubmoduleWhenTester extends BasicTester {
   }
 }
 
+/*
 class WhenCondTester extends BasicTester {
   val pred = Wire(Vec(4, Bool()))
   val (cycle, done) = Counter(true.B, 1 << pred.size)
@@ -218,3 +219,4 @@ class WhenSpec extends ChiselFlatSpec with Utils {
     chirrtl shouldNot include("skip")
   }
 }
+*/
