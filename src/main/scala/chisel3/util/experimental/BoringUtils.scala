@@ -8,7 +8,7 @@ import chisel3.reflect.DataMirror
 import chisel3.Data.ProbeInfo
 import chisel3.experimental.{annotate, requireIsHardware, skipPrefix, BaseModule, ChiselAnnotation, SourceInfo}
 import chisel3.internal.{Builder, BuilderContextCache, NamedComponent, Namespace}
-import chisel3.internal.binding.{CrossModuleBinding, PortBinding}
+import chisel3.internal.binding.{CrossModuleBinding, PortBinding, ConditionalDeclarable}
 import firrtl.transforms.{DontTouchAnnotation, NoDedupAnnotation}
 import firrtl.passes.wiring.{SinkAnnotation, SourceAnnotation}
 import firrtl.annotations.{ComponentName, ModuleName}
@@ -241,6 +241,7 @@ object BoringUtils {
       case None => purePortTypeBase
     }
     def isPort(d: Data): Boolean = d.topBindingOpt match {
+      // case Some(PortBinding(_, b)) => { println(s"isPort(d=${d}), block=${b} (${b.map(_.commands)})"); true }
       case Some(PortBinding(_, _)) => true
       case _                    => false
     }
@@ -259,6 +260,10 @@ object BoringUtils {
       path.zip(connectionLocation).foldLeft(source) {
 case x @ (rhs, (module, conLoc)) =>
   println(s"rhs=${rhs}, module=${module}, conLoc=${conLoc}")
+  rhs.topBindingOpt match {
+    case Some(cd: ConditionalDeclarable) => println(s"CD binding on rhs=${rhs}, block=${cd.parentBlock} (${cd.parentBlock.map(_.commands.result())})")
+    case _ => ()
+  }
   x match {
         case (rhs, (module, conLoc)) if (module.isFullyClosed) => boringError(module); DontCare.asInstanceOf[A]
         case (rhs, (module, _))
