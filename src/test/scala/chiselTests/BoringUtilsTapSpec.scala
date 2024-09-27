@@ -163,6 +163,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
       val foo = Module(new Foo(parentWire))
     }
     val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top)
+    println(chirrtl)
 
     // The connect should be at the end of the when block.
     matchesAndOmits(chirrtl)(

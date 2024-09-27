@@ -84,7 +84,7 @@ abstract class RawModule extends BaseModule {
   //
   // RTL construction internals
   //
-  private val _body = new Block(UnlocatableSourceInfo, None /* instance command?*/)
+  /* private */ val _body = new Block(UnlocatableSourceInfo, None /* instance command?*/)
   println("RawModule, resetting block stack...")
   Builder.blockStack = Nil
   println(s"pushing body ${_body} for this=${this}")
@@ -273,13 +273,13 @@ abstract class RawModule extends BaseModule {
 
     val rhs = computeConnection(left, right)
     //require(!_closed, "must not be closed")
-    Builder.currentBlock.get.commands += rhs
-    //val secretCommands = if (_closed) {
-    //  _component.get.asInstanceOf[DefModule].secretCommands
-    //} else {
-    //  Builder.currentBlock.get.commands
-    //}
-    //secretCommands += rhs
+    //Builder.currentBlock.get.commands += rhs
+    val secretCommands = if (_closed) {
+      _component.get.asInstanceOf[DefModule].secretCommands
+    } else {
+      Builder.currentBlock.get.commands
+    }
+    secretCommands += rhs
     //require(_closed || Builder.currentBlock.get.commands.result().contains(rhs), "failed to add")
   }
 

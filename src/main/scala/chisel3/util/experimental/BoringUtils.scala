@@ -287,7 +287,7 @@ case x @ (rhs, (module, conLoc)) =>
             // val block = if (Builder.currentModule.isEmpty || Builder.currentModule.contains(conLoc)) Builder.currentBlock.get else module._block.get
             def createAndConnect : A = {
             val bore = if (up) module.createSecretIO(purePortType) else module.createSecretIO(Flipped(purePortTypeBase))
-            println(s"created port ${bore} in ${module}")
+            println(s"created port ${bore} in ${module} ${if (up) "UP" else "DOWN"}")
             println(s"port parent: ${parent(bore)}")
             module.addSecretIO(bore)
             if (isDrive) {
@@ -297,10 +297,14 @@ case x @ (rhs, (module, conLoc)) =>
             }
              bore
             }
-            if (Builder.currentModule.isEmpty || Builder.currentModule.contains(conLoc) || Builder.currentBlock.contains(module._block)) 
+            if (Builder.currentModule.isEmpty || Builder.currentModule.contains(conLoc)/* || Builder.currentBlock.contains(module._block)*/) {
+              println("---------- direct createAndConnect")
               createAndConnect
-            else
-              conLoc.asInstanceOf[RawModule].withRegion(module._block.get) { createAndConnect }
+            }
+            else {
+              println("---------- placement createAndConnect")
+              conLoc.asInstanceOf[RawModule].withRegion(if (conLoc == module) module.asInstanceOf[RawModule]._body else module._block.get) { createAndConnect }
+            }
           }
       }
 }
