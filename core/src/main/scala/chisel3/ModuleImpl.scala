@@ -386,6 +386,7 @@ package internal {
       println("cloneIORecord!!! clonePorts=${clonePorts} (setting block to `None`...)")
       // clonePorts.bind(PortBinding(cloneParent, /*block=*/None))
       clonePorts.setAllParents(Some(cloneParent))
+      clonePorts.setAllParentBlocks(None)
       cloneParent._portsRecord = clonePorts
       if (proto.isInstanceOf[Module]) {
         clonePorts("clock") := Module.clock
