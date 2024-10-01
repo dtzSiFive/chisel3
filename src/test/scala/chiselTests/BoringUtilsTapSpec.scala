@@ -821,6 +821,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
       probe.forceInitial(BoringUtils.rwTap(foo.bar.view), false.B)
     }
     val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top)
+    println(chirrtl)
     matchesAndOmits(chirrtl)(
       "module Bar :",
       "output out_bore : RWProbe<UInt<1>>",
