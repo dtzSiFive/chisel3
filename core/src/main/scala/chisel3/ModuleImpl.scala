@@ -477,10 +477,12 @@ package experimental {
 
       Builder.currentModule = Some(this)
       //Builder.whenStack = Nil
-      println(s"bs=${blockStack} (_block=${_block}")
-      if (Builder.blockStack == Nil) {
-        println(s"this=${this}")
-      }
+      //println(s"bs=${blockStack} (_block=${_block}")
+      //if (Builder.blockStack == Nil) {
+      //  println(s"this=${this}")
+      //}
+      // TODO: Revisit!!
+      Builder.blockStack = Nil
       // require(Builder.blockStack != Nil, "bs is Nil")
       //Builder.blockStack = Nil
       //Builder.pushBlock(Builder.forcedUserModule._body)

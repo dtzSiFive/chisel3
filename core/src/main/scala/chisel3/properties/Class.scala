@@ -73,6 +73,10 @@ class Class extends BaseModule {
     _component
   }
 
+  // HACK
+  Builder.blockStack = Nil
+  // Builder.pushBlock(_body)
+
   private[chisel3] override def initializeInParent(): Unit = ()
 
   /** Add a PropAssign command to the Class
