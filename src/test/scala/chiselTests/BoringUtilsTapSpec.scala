@@ -6,6 +6,7 @@ import chisel3._
 import chisel3.probe
 import chisel3.testers._
 import chisel3.util.experimental.BoringUtils
+import chisel3.experimental.ExtModule
 
 class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils with MatchesAndOmits {
   "Ready-only tap" should "work downwards from parent to child" in {
@@ -342,6 +343,124 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
       "connect out, read(foo.out_bore)",
       "force_initial(foo.bore, UInt<1>(0h0))"
     )()
+  }
+
+  it should "re-use existing rwprobe on rawmodule" in {
+    class Foo() extends RawModule {
+      val x = WireInit(Bool(), true.B)
+      val outProbe = IO(probe.RWProbe(Bool()))
+      probe.define(outProbe, probe.RWProbeValue(x))
+    }
+    class Top extends RawModule {
+      val foo = Module(new Foo())
+      val rwTap = BoringUtils.rwTap(foo.outProbe)
+    }
+    val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top)
+    println(chirrtl)
+    // TODO: Check don't add extra rwprobe port.
+    assert(false, "REUSE")
+  }
+
+  it should "re-use existing rwprobe on extmodule" in {
+    class Foo() extends ExtModule {
+      val outProbe = IO(probe.RWProbe(Bool()))
+    }
+    class Top extends RawModule {
+      val foo = Module(new Foo())
+      val rwTap = BoringUtils.rwTap(foo.outProbe)
+    }
+    val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top)
+    println(chirrtl)
+    assert(false, "REUSE")
+  }
+
+  it should "re-use existing probe on rawmodule" in {
+    class Foo() extends RawModule {
+      val x = WireInit(Bool(), true.B)
+      val outProbe = IO(probe.Probe(Bool()))
+      probe.define(outProbe, probe.ProbeValue(x))
+    }
+    class Top extends RawModule {
+      val foo = Module(new Foo())
+      val rwTap = BoringUtils.tap(foo.outProbe)
+    }
+    val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top)
+    println(chirrtl)
+    assert(false, "REUSE probe raw")
+  }
+
+  it should "re-use existing probe on extmodule" in {
+    class Foo() extends ExtModule {
+      val outProbe = IO(probe.Probe(Bool()))
+    }
+    class Top extends RawModule {
+      val foo = Module(new Foo())
+      val rwTap = BoringUtils.tap(foo.outProbe)
+    }
+    val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top)
+    println(chirrtl)
+    assert(false, "REUSE probe ext")
+  }
+
+  it should "error if rwprobe a probe port on extmodule" in {
+    class Foo() extends ExtModule {
+      val outProbe = IO(probe.Probe(Bool()))
+    }
+    class Top extends RawModule {
+      val foo = Module(new Foo())
+      val rwTap = BoringUtils.rwTap(foo.outProbe)
+    }
+    val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top)
+    println(chirrtl)
+    assert(false, "error rwprobe of probe on extmodule")
+  }
+
+  it should "error if rwprobe a non-probe port on extmodule" in {
+    class Foo() extends ExtModule {
+      val out = IO(Bool())
+    }
+    class Top extends RawModule {
+      val foo = Module(new Foo())
+      val rwTap = BoringUtils.rwTap(foo.out)
+    }
+    val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top)
+    println(chirrtl)
+    assert(false, "error non-probe on extmodule")
+  }
+
+  //it should "error if rwprobe a non-rwprobe port, raw" in {
+  //  class Foo() extends RawModule {
+  //    val x = WireInit(Bool(), true.B)
+  //    val outProbe = IO(probe.Probe(Bool()))
+  //    probe.define(outProbe, probe.ProbeValue(x))
+  //  }
+  //  class Top extends RawModule {
+  //    val foo = Module(new Foo())
+  //    val rwTap = BoringUtils.rwTap(foo.outProbe)
+  //  }
+  //  val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top)
+  //  println(chirrtl)
+  //  assert(false, "REUSE")
+  //}
+
+  it should "error if rwprobe a non-probe port, raw" in {
+    class Foo() extends RawModule {
+      val x = WireInit(Bool(), true.B)
+      val outProbe = IO(probe.Probe(Bool()))
+      probe.define(outProbe, probe.ProbeValue(x))
+    }
+    class Top extends RawModule {
+      val foo = Module(new Foo())
+      val rwTap = BoringUtils.rwTap(foo.outProbe)
+      probe.forceInitial(rwTap, true.B)
+    }
+    val chirrtl = circt.stage.ChiselStage.emitCHIRRTL(new Top)
+    println(chirrtl)
+
+    // Check is valid FIRRTL.
+    circt.stage.ChiselStage.emitFIRRTLDialect(new Top)
+
+    assert(false, "rwTap a probe, force")
   }
 
   it should "not work upwards child to parent" in {
