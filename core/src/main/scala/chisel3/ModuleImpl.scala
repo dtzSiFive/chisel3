@@ -88,9 +88,10 @@ private[chisel3] trait ObjectModuleImpl {
     //   - set currentClockAndReset
     val module: T = bc // bc is actually evaluated here
 
-    // println(s"BB blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
-    require(Builder.blockDepth == 1, "body leftover")
-    Builder.popBlock()
+    println(s"BB blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
+    require(Builder.blockDepth <= 1, "body leftover")
+    if (Builder.blockDepth == 1)
+      Builder.popBlock()
 
     if (Builder.blockDepth != 0) {
       throwException("Internal Error! block scope depth is != 0, this should have been caught!")
