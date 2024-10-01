@@ -91,15 +91,6 @@ private[chisel3] trait ObjectModuleImpl {
 
     println(s"BB blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
     require(Builder.blockDepth <= 1, "body leftover")
-    if (Builder.blockDepth == 1) {
-      Builder.popBlock()
-      println("block stack now empty! YYYYYYYYYYYYYY")
-      // require(Builder.currentBlock == parentBlockStack.headOption, "popped but result doesn't match")
-    }
-
-    if (Builder.blockDepth != 0) {
-      throwException("Internal Error! block scope depth is != 0, this should have been caught!")
-    }
     if (Builder.readyForModuleConstr) {
       throwException(
         "Error: attempted to instantiate a Module, but nothing happened. " +
@@ -112,6 +103,17 @@ private[chisel3] trait ObjectModuleImpl {
     val componentOpt = module.generateComponent()
     for (component <- componentOpt) {
       Builder.components += component
+    }
+
+    println("component generated, maybe")
+    if (Builder.blockDepth == 1) {
+      Builder.popBlock()
+      println("block stack now empty! YYYYYYYYYYYYYY")
+      // require(Builder.currentBlock == parentBlockStack.headOption, "popped but result doesn't match")
+    }
+
+    if (Builder.blockDepth != 0) {
+      throwException("Internal Error! block scope depth is != 0, this should have been caught!")
     }
 
     // Reset Builder state *after* generating the component, so any atModuleBodyEnd generators are still within the
