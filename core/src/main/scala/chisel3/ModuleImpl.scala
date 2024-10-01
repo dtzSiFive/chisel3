@@ -79,7 +79,7 @@ private[chisel3] trait ObjectModuleImpl {
     val saveEnabledLayers = Builder.enabledLayers
     Builder.enabledLayers = LinkedHashSet.empty
 
-    // println(s"AA blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
+    println(s"AA blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
 
     // Execute the module, this has the following side effects:
     //   - set currentModule
@@ -93,6 +93,7 @@ private[chisel3] trait ObjectModuleImpl {
     require(Builder.blockDepth <= 1, "body leftover")
     if (Builder.blockDepth == 1) {
       Builder.popBlock()
+      println("block stack now empty! YYYYYYYYYYYYYY")
       // require(Builder.currentBlock == parentBlockStack.headOption, "popped but result doesn't match")
     }
 
