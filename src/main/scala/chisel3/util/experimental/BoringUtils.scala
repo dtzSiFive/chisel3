@@ -228,7 +228,7 @@ object BoringUtils {
     implicit si: SourceInfo
   ): A = {
     def parent(d: Data): BaseModule = d.topBinding.location.get
-    //def parentBlock(d: Data) = d.topBindingOpt.asInstanceOf[ConditionalDeclarable].parentBlock
+    def parentBlock(d: Data) = d.topBindingOpt.asInstanceOf[ConditionalDeclarable].parentBlock
     def purePortTypeBase = if (createProbe.nonEmpty) Output(chiselTypeOf(source))
     else if (DataMirror.hasOuterFlip(source)) Flipped(chiselTypeOf(source))
     else chiselTypeOf(source)
@@ -299,19 +299,32 @@ case x @ (rhs, (module, conLoc)) =>
             }
              bore
             }
-            createAndConnect
-     //       if (Builder.currentModule.isEmpty || Builder.currentModule.contains(conLoc)/* || Builder.currentBlock.contains(module._block)*/) {
-     //         println("---------- direct createAndConnect")
-     //         createAndConnect
-     //       }
-     //       else {
-     //         println("---------- placement createAndConnect")
-//   //           conLoc.asInstanceOf[RawModule].withRegion((up, conLoc == module) match {
-//cas//e (true, 
-//if //(up) (if (conLoc == module) module.asInstanceOf[RawModule]._body else module._block.get
-//}))// { createAndConnect }
-     //           createAndConnect
-     //       }
+            
+            // Connect goes at destination if down, source if up.
+            //createAndConnect
+            if (Builder.currentModule.isEmpty || Builder.currentModule.contains(conLoc)/* || Builder.currentBlock.contains(module._block)*/) {
+              println("---------- direct createAndConnect")
+              createAndConnect
+            }
+            else {
+              println("---------- placement createAndConnect")
+              val rwprobeTime = createProbe.nonEmpty && createProbe.get.writable
+              println(s"rwprobeTime: ${rwprobeTime}")
+              val block = (up, conLoc == module || rwprobeTime) match {
+                case (_, false) => module._block.get
+                case (true, _) => 
+                  rhs.topBindingOpt match {
+                    case Some(cd: ConditionalDeclarable) if cd.parentBlock.nonEmpty && !rwprobeTime => println(s"cd.parentBlock: ${cd.parentBlock}, ${cd.parentBlock.map(_.commands.result())})"); cd.parentBlock.get
+                    case _ => module.asInstanceOf[RawModule]._body
+                  }
+                case _ => module.asInstanceOf[RawModule]._body
+              }
+              // (up, conLoc == module) match {
+              // case (true, 
+              // })) { createAndConnect }
+              conLoc.asInstanceOf[RawModule].withRegion(block) { createAndConnect }
+                // createAndConnect
+            }
           }
       }
 }

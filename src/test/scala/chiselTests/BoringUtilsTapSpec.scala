@@ -63,6 +63,7 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
   it should "work downwards from grandparent to grandchild through when" in {
     class Bar extends RawModule {
       val internalWire = Wire(Bool())
+      internalWire := DontCare
     }
     class Foo extends RawModule {
       when(true.B) {

@@ -278,13 +278,15 @@ abstract class RawModule extends BaseModule {
 
     val rhs = computeConnection(left, right)
     //require(!_closed, "must not be closed")
+    val block = if (_closed && Builder.currentBlock == Some(_body)) _component.get.asInstanceOf[DefModule].secretCommands else Builder.currentBlock.get.commands
+    block += rhs
     //Builder.currentBlock.get.commands += rhs
-    val secretCommands = if (_closed) {
-      _component.get.asInstanceOf[DefModule].secretCommands
-    } else {
-      Builder.currentBlock.get.commands
-    }
-    secretCommands += rhs
+    //val secretCommands = if (_closed) {
+    //  _component.get.asInstanceOf[DefModule].secretCommands
+    //} else {
+    //  Builder.currentBlock.get.commands
+    //}
+    //secretCommands += rhs
     //require(_closed || Builder.currentBlock.get.commands.result().contains(rhs), "failed to add")
   }
 
