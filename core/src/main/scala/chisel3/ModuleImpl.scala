@@ -37,6 +37,7 @@ private[chisel3] trait ObjectModuleImpl {
       }
 
       val component = module._component.get
+      println(s"module: ${module}, currentModule: ${Builder.currentModule}")
       component match {
         case DefClass(_, name, _, _) =>
           Builder.referenceUserContainer match {
@@ -90,8 +91,10 @@ private[chisel3] trait ObjectModuleImpl {
 
     println(s"BB blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
     require(Builder.blockDepth <= 1, "body leftover")
-    if (Builder.blockDepth == 1)
+    if (Builder.blockDepth == 1) {
       Builder.popBlock()
+      // require(Builder.currentBlock == parentBlockStack.headOption, "popped but result doesn't match")
+    }
 
     if (Builder.blockDepth != 0) {
       throwException("Internal Error! block scope depth is != 0, this should have been caught!")
