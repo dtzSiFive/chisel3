@@ -93,8 +93,8 @@ private[chisel3] object MonoConnect {
     * @return None if visible, Some(location of original when declaration)
     */
   def checkWhenVisibility(x: Data): Option[SourceInfo] = {
-    println("VVVVVVVVVVVVVV")
-    println(s"checkWhenVisibility(x = ${x}): topBinding=${x.topBinding}, cur=${Builder.currentModule}, bs=${Builder.blockStack.map(_.commands.result())} @ ${Builder.blockStack.map(_.sourceInfo)}")
+//    println("VVVVVVVVVVVVVV")
+//    println(s"checkWhenVisibility(x = ${x}): topBinding=${x.topBinding}, cur=${Builder.currentModule}, bs=${Builder.blockStack.map(_.commands.result())} @ ${Builder.blockStack.map(_.sourceInfo)}")
     x.topBinding match {
       case mp: MemoryPortBinding =>
         None // TODO (albert-magyar): remove this "bridge" for odd enable logic of current CHIRRTL memories
@@ -103,7 +103,7 @@ private[chisel3] object MonoConnect {
       case spb @ SecretPortBinding(enc, b) if Builder.currentModule.isEmpty || Builder.currentModule.contains(enc) || Builder.currentBlock == b => None
       case _ : SecretPortBinding => println("SKIPPING VIS ON secret port!"); None
       // case _ : PortBinding | _ : SecretPortBinding => println(s"topBinding=${x.topBinding}, currentModule=${Builder.currentModule}"); None /* Skip all ports since doesn't work */
-      case cd: ConditionalDeclarable => cd.parentBlock.collect { case b: Block if !Builder.currentBlock /*blockStack*/.contains(b) => require(Builder.currentBlock.isDefined, "no current block"); println(s"XXXXXXXXXXXXX visibility of ${x} is ${b.sourceInfo} (${b} on CD, curB=${Builder.currentBlock})"); println(s"\t${Builder.currentBlock.get.sourceInfo}"); b.sourceInfo }
+      case cd: ConditionalDeclarable => cd.parentBlock.collect { case b: Block if !Builder.currentBlock /*blockStack*/.contains(b) => require(Builder.currentBlock.isDefined, "no current block"); /* println(s"XXXXXXXXXXXXX visibility of ${x} is ${b.sourceInfo} (${b} on CD, curB=${Builder.currentBlock})"); println(s"\t${Builder.currentBlock.get.sourceInfo}"); */ b.sourceInfo }
       case _ => None
     }
   }

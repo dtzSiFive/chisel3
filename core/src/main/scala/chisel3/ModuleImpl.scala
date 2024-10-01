@@ -23,9 +23,9 @@ private[chisel3] trait ObjectModuleImpl {
 
   protected def _applyImpl[T <: BaseModule](bc: => T)(implicit sourceInfo: SourceInfo): T = {
     // Instantiate the module definition.
-    println(s"applyImpl BEGIN! \\\\\\\\ current=${Builder.currentModule}")
+    // println(s"applyImpl BEGIN! \\\\\\\\ current=${Builder.currentModule}")
     val module = evaluate[T](bc)
-    println(s"applyImpl   END! //// current=${Builder.currentModule}, module=${module}")
+    // println(s"applyImpl   END! //// current=${Builder.currentModule}, module=${module}")
 
     // Handle connections at enclosing scope
     // We use _component because Modules that don't generate them may still have one
@@ -78,7 +78,7 @@ private[chisel3] trait ObjectModuleImpl {
     val saveEnabledLayers = Builder.enabledLayers
     Builder.enabledLayers = LinkedHashSet.empty
 
-    println(s"AA blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
+    // println(s"AA blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
 
     // Execute the module, this has the following side effects:
     //   - set currentModule
@@ -88,7 +88,7 @@ private[chisel3] trait ObjectModuleImpl {
     //   - set currentClockAndReset
     val module: T = bc // bc is actually evaluated here
 
-    println(s"BB blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
+    // println(s"BB blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
     require(Builder.blockDepth == 1, "body leftover")
     Builder.popBlock()
 
@@ -174,11 +174,11 @@ private[chisel3] trait ObjectModuleImpl {
   )(
     implicit sourceInfo: SourceInfo
   ): T = {
-    println(s"do_pseudo_apply BEGIN \\\\ current=${Builder.currentModule}, this=${this}")
+    // println(s"do_pseudo_apply BEGIN \\\\ current=${Builder.currentModule}, this=${this}")
     val parent = Builder.currentModule
     val module: T = bc // bc is actually evaluated here
     if (!parent.isEmpty) { Builder.currentModule = parent }
-    println(s"do_pseudo_apply   END // current=${Builder.currentModule}, this=${this}")
+    // println(s"do_pseudo_apply   END // current=${Builder.currentModule}, this=${this}")
 
     module
   }
@@ -384,7 +384,7 @@ package internal {
       // still need to fix it up here.
       Module.assignCompatDir(clonePorts)
       println("cloneIORecord!!! clonePorts=${clonePorts} (setting block to `None`...)")
-      clonePorts.bind(PortBinding(cloneParent, /*block=*/None))
+      // clonePorts.bind(PortBinding(cloneParent, /*block=*/None))
       clonePorts.setAllParents(Some(cloneParent))
       cloneParent._portsRecord = clonePorts
       if (proto.isInstanceOf[Module]) {

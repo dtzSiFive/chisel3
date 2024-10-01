@@ -85,9 +85,9 @@ abstract class RawModule extends BaseModule {
   // RTL construction internals
   //
   /* private */ val _body = new Block(UnlocatableSourceInfo, None /* instance command?*/)
-  println("RawModule, resetting block stack...")
+  // println("RawModule, resetting block stack...")
   Builder.blockStack = Nil
-  println(s"pushing body ${_body} for this=${this}")
+  // println(s"pushing body ${_body} for this=${this}")
   Builder.pushBlock(_body)
 
   /** The current region to which commands will be added. */
