@@ -79,7 +79,7 @@ private[chisel3] trait ObjectModuleImpl {
     val saveEnabledLayers = Builder.enabledLayers
     Builder.enabledLayers = LinkedHashSet.empty
 
-    println(s"AA blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
+    // println(s"AA blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
 
     // Execute the module, this has the following side effects:
     //   - set currentModule
@@ -89,7 +89,7 @@ private[chisel3] trait ObjectModuleImpl {
     //   - set currentClockAndReset
     val module: T = bc // bc is actually evaluated here
 
-    println(s"BB blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
+    // println(s"BB blockDepth=${Builder.blockDepth}, blockStack=${Builder.blockStack}")
     require(Builder.blockDepth <= 1, "body leftover")
     if (Builder.readyForModuleConstr) {
       throwException(
@@ -105,7 +105,7 @@ private[chisel3] trait ObjectModuleImpl {
       Builder.components += component
     }
 
-    println("component generated, maybe")
+    // println("component generated, maybe")
     if (Builder.blockDepth == 1) {
       Builder.popBlock()
       println("block stack now empty! YYYYYYYYYYYYYY")
@@ -187,7 +187,7 @@ private[chisel3] trait ObjectModuleImpl {
     val module: T = bc // bc is actually evaluated here
     if (!parent.isEmpty) { Builder.currentModule = parent }
     if (Builder.hasDynamicContext) {
-      println(s"do_pseudo_apply\n\told BS=${blockStack}\n\tnew BS=${Builder.blockStack}")
+      // println(s"do_pseudo_apply\n\told BS=${blockStack}\n\tnew BS=${Builder.blockStack}")
         Builder.blockStack = blockStack
     }
     // println(s"do_pseudo_apply   END // current=${Builder.currentModule}, this=${this}")
