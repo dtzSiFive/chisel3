@@ -108,11 +108,15 @@ abstract class RawModule extends BaseModule {
     // var oldRegion = _currentRegion
     //_currentRegion.commands ++= stagedSecretCommands
     //stagedSecretCommands.clear()
+    val curBlock = Builder.currentBlock
     Builder.pushBlock(newRegion)
+    require(Builder.currentBlock == Some(newRegion), "pushBlock didn't work as expected")
     val result = thunk
     //_currentRegion.commands ++= stagedSecretCommands
     //stagedSecretCommands.clear()
+    require(Builder.currentBlock == Some(newRegion), "withRegion changed block")
     Builder.popBlock()
+    require(Builder.currentBlock == curBlock, "popBlock didn't work as expected")
     result
   }
 
