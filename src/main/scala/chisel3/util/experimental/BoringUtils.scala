@@ -273,7 +273,7 @@ case x @ (rhs, (module, conLoc)) =>
               (!createProbe.nonEmpty || !createProbe.get.writable)) => {
           // When drilling from the original source, or driving to the sink, if it's already a port just return it.
           // As an exception, insist rwTaps are done from within the module and exported out.
-          println(s"re-using port ${rhs}")
+          // require(false, "testing")
           rhs
         }
         case (rhs, (module, conLoc)) =>
