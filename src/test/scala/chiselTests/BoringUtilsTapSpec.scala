@@ -861,4 +861,59 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
     val e = the[ChiselException] thrownBy circt.stage.ChiselStage.emitCHIRRTL(new Top)
     e.getMessage should include("BoringUtils currently only support identity views")
   }
+
+
+  // TODO: Move elsewhere!!
+  it should "emit error for sibling block visibility" in {
+    class Child extends Module {
+      val in = IO(Input(UInt(8.W)))
+      val out = IO(Output(UInt(8.W)))
+
+      out := in
+    }
+
+    class Foo extends Module {
+      val in = IO(Input(UInt(8.W)))
+      val out = IO(Output(UInt(8.W)))
+
+      var c: Bool = null
+      when (true.B) {
+        c = WireInit(Bool(), true.B)
+        out := c
+      } .otherwise {
+        c := false.B
+        out := c
+      }
+    }
+    val e = the[ChiselException] thrownBy circt.stage.ChiselStage.emitCHIRRTL(new Foo)
+    e.getMessage should include("asdf: sibling when")
+  }
+
+  // TODO: Move elsewhere!!
+  // Issue 4405
+  it should "emit error for port visibility" in {
+    class Child extends Module {
+      val in = IO(Input(UInt(8.W)))
+      val out = IO(Output(UInt(8.W)))
+
+      out := in
+    }
+
+    class Foo extends Module {
+      val in = IO(Input(UInt(8.W)))
+      val out = IO(Output(UInt(8.W)))
+
+      var c: Bool = null
+      when (true.B) {
+        c = WireInit(Bool(), true.B)
+        out := c
+      } .otherwise {
+        c := false.B
+        out := c
+      }
+    }
+    val e = the[ChiselException] thrownBy circt.stage.ChiselStage.emitCHIRRTL(new Foo)
+    e.getMessage should include("ASDF: port exception")
+  }
+
 }
