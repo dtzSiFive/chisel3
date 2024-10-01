@@ -815,7 +815,10 @@ private[chisel3] object Builder extends LazyLogging {
     lastBlock
   }
 
-  def currentBlock: Option[Block] = dynamicContext.blockStack.headOption
+  def currentBlock: Option[Block] = dynamicContextVar.value match {
+case Some(dc) => dc.blockStack.headOption
+case _ => None
+}
 
   //def currentWhen: Option[WhenContext] = dynamicContext.whenStack.headOption
 
