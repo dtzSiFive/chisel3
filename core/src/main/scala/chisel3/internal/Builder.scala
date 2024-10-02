@@ -783,22 +783,22 @@ private[chisel3] object Builder extends LazyLogging {
     dynamicContext.readyForModuleConstr = target
   }
 
-  //def whenDepth: Int = dynamicContext.whenStack.length
+  def whenDepth: Int = dynamicContext.whenStack.length
 
-  //def pushWhen(wc: WhenContext): Unit = {
-  //  dynamicContext.whenStack = wc :: dynamicContext.whenStack
-  //}
+  def pushWhen(wc: WhenContext): Unit = {
+    dynamicContext.whenStack = wc :: dynamicContext.whenStack
+  }
 
-  //def popWhen(): WhenContext = {
-  //  val lastWhen = dynamicContext.whenStack.head
-  //  dynamicContext.whenStack = dynamicContext.whenStack.tail
-  //  lastWhen
-  //}
+  def popWhen(): WhenContext = {
+    val lastWhen = dynamicContext.whenStack.head
+    dynamicContext.whenStack = dynamicContext.whenStack.tail
+    lastWhen
+  }
 
-  //def whenStack: List[WhenContext] = dynamicContext.whenStack
-  //def whenStack_=(s: List[WhenContext]): Unit = {
-  //  dynamicContext.whenStack = s
-  //}
+  def whenStack: List[WhenContext] = dynamicContext.whenStack
+  def whenStack_=(s: List[WhenContext]): Unit = {
+    dynamicContext.whenStack = s
+  }
 
   //def currentWhen: Option[WhenContext] = dynamicContext.whenStack.headOption
 

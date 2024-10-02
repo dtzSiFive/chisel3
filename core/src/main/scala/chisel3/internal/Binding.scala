@@ -67,6 +67,7 @@ private[chisel3] object binding {
 
   // A component that can potentially be declared inside a 'when'
   sealed trait ConditionalDeclarable extends TopBinding {
+    // TODO: rename ConditionalDeclarable!
     def parentBlock: Option[Block]
   }
 

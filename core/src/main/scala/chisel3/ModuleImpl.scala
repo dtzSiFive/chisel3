@@ -812,7 +812,7 @@ package experimental {
       Module.assignCompatDir(iodef)
 
       // TODO: revisit this!! PortBinding parentBlock as module's instantiating block.
-      // vs "None" vs body!
+      // vs "None" vs body! vs dropping it
       iodef.bind(PortBinding(this, None))
       _ports += iodef -> sourceInfo
     }
@@ -833,7 +833,7 @@ package experimental {
 
       Module.assignCompatDir(iodef)
       // TODO: revisit this!! (Secret)PortBinding parentBlock as module's instantiating block.
-      // vs "None" vs body!
+      // vs "None" vs body! vs dropping it
       iodef.bind(SecretPortBinding(this, None), iodef.specifiedDirection)
       iodef
     }
