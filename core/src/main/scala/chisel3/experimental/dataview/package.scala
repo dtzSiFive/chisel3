@@ -38,8 +38,8 @@ package object dataview {
 
       // Setting the parent marks these Data as Views
       result.setAllParents(Some(ViewParent))
-      println(s"VIEWAS result=${result}\n\tbs=${Builder.currentBlock}")
-      result.setAllParentBlocks(Builder.currentBlock)
+      // println(s"VIEWAS result=${result}\n\tbs=${Builder.currentBlock}")
+      // result.setAllParentBlocks(Builder.currentBlock)
       // The names of views do not matter except for when a view is annotated. For Views that correspond
       // To a single Data, we just forward the name of the Target. For Views that correspond to more
       // than one Data, we return this assigned name but rename it in the Convert stage

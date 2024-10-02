@@ -15,7 +15,7 @@ object attach {
 
   // Actual implementation
   private[chisel3] def impl(elts: Seq[Analog], contextModule: RawModule)(implicit sourceInfo: SourceInfo): Unit = {
-    // TODO: nope, but hack until sort this out.
+    // TODO: fixup exception message
     if (Builder.blockDepth > 1) throw ConditionalAttachException
 
     // TODO Check that references are valid and can be attached
