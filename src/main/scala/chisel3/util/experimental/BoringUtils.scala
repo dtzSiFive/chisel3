@@ -311,7 +311,7 @@ case x @ (rhs, (module, conLoc)) =>
               val rwprobeTime = createProbe.nonEmpty && createProbe.get.writable
               println(s"rwprobeTime: ${rwprobeTime}")
               val block = (up, conLoc == module || rwprobeTime) match {
-                case (_, false) => module._block.get
+                // case (_, false) => module._block.get
                 case (true, _) => 
                   rhs.topBindingOpt match {
                     case Some(cd: ConditionalDeclarable) if cd.parentBlock.nonEmpty && !rwprobeTime => println(s"cd.parentBlock: ${cd.parentBlock}, ${cd.parentBlock.map(_.commands.result())})"); cd.parentBlock.get

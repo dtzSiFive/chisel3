@@ -122,14 +122,14 @@ private[chisel3] trait HasId extends chisel3.InstanceId {
     _parentVar = target.getOrElse(null)
   }
 
-  private var _blockVar:       Block = Builder.currentBlock.getOrElse(null)
-  private[chisel3] def _block: Option[Block] = {
-    println(s"HasID this=${this}, access '_block' -> ${Option(_blockVar)}")
-    Option(_blockVar)
-  }
-  private[chisel3] def _block_=(target: Option[Block]): Unit = {
-    _blockVar = target.getOrElse(null)
-  }
+//  private var _blockVar:       Block = Builder.currentBlock.getOrElse(null)
+//  private[chisel3] def _block: Option[Block] = {
+//    println(s"HasID this=${this}, access '_block' -> ${Option(_blockVar)}")
+//    Option(_blockVar)
+//  }
+//  private[chisel3] def _block_=(target: Option[Block]): Unit = {
+//    _blockVar = target.getOrElse(null)
+//  }
 
   private[chisel3] val _id: Long = Builder.idGen.next
 
