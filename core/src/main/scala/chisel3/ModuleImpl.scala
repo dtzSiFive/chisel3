@@ -177,13 +177,17 @@ private[chisel3] trait ObjectModuleImpl {
   ): T = {
     // println(s"do_pseudo_apply BEGIN \\\\ current=${Builder.currentModule}, this=${this}")
     val parent = Builder.currentModule
-    /// val blockStack = if (Builder.hasDynamicContext) Builder.blockStack else Nil
+    val blockStackOpt = Option.when (Builder.hasDynamicContext)(Builder.blockStack)
     val module: T = bc // bc is actually evaluated here
     if (!parent.isEmpty) { Builder.currentModule = parent }
-    // if (Builder.hasDynamicContext) {
-    //   // println(s"do_pseudo_apply\n\told BS=${blockStack}\n\tnew BS=${Builder.blockStack}")
-    //     Builder.blockStack = blockStack
-    // }
+    blockStackOpt.foreach(Builder.blockStack = _)
+    // TODO: Where is `blockStack` references below coming from?!
+    //if (Builder.hasDynamicContext) {
+    //    println(s"do_pseudo_apply\n\told BS=${blockStack}\n\tnew BS=${Builder.blockStack}")
+    //    //println(s"bs=${blockStack}")
+    //    Builder.blockStack = blockStack
+    //    require(false, "what")
+    //}
     // println(s"do_pseudo_apply   END // current=${Builder.currentModule}, this=${this}")
 
     module
