@@ -345,11 +345,12 @@ private[chisel3] object ir {
     def addCommand(c: Command): Unit = {
       commands += c
     }
+    def getCommands() : Seq[Command] = commands.result()
   }
 
   object Block {
     def unapply(block: Block): Option[(Seq[Command], SourceInfo)] = {
-      Some((block.commands.result(), block.sourceInfo))
+      Some((block.getCommands(), block.sourceInfo))
     }
   }
 
@@ -370,8 +371,8 @@ private[chisel3] object ir {
         (
           when.sourceInfo,
           when.pred,
-          when.ifRegion.commands.result(),
-          Option(when._elseRegion).fold(Seq.empty[Command])(_.commands.result())
+          when.ifRegion.getCommands(),
+          Option(when._elseRegion).fold(Seq.empty[Command])(_.getCommands())
         )
       )
     }
@@ -405,7 +406,7 @@ private[chisel3] object ir {
 
   object LayerBlock {
     def unapply(layerBlock: LayerBlock): Option[(SourceInfo, String, Seq[Command])] = {
-      Some((layerBlock.sourceInfo, layerBlock.layer.name, layerBlock.region.commands.result()))
+      Some((layerBlock.sourceInfo, layerBlock.layer.name, layerBlock.region.getCommands()))
     }
   }
 

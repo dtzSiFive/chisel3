@@ -233,7 +233,7 @@ abstract class RawModule extends BaseModule {
     // Generate IO invalidation commands to initialize outputs as unused,
     //  unless the client wants explicit control over their generation.
     val component =
-      DefModule(this, name, _isPublic, Builder.enabledLayers.toSeq, firrtlPorts, _body.commands.result())
+      DefModule(this, name, _isPublic, Builder.enabledLayers.toSeq, firrtlPorts, _body.getCommands())
 
     // Secret connections can be staged if user bored into children modules
     //component.secretCommands ++= stagedSecretCommands

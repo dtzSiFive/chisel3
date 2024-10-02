@@ -8,7 +8,7 @@ import chisel3.reflect.DataMirror
 import chisel3.Data.ProbeInfo
 import chisel3.experimental.{annotate, requireIsHardware, skipPrefix, BaseModule, ChiselAnnotation, SourceInfo}
 import chisel3.internal.{Builder, BuilderContextCache, NamedComponent, Namespace}
-import chisel3.internal.binding.{CrossModuleBinding, PortBinding, ConditionalDeclarable}
+import chisel3.internal.binding.{CrossModuleBinding, PortBinding, ConditionalDeclarable, SecretPortBinding}
 import firrtl.transforms.{DontTouchAnnotation, NoDedupAnnotation}
 import chisel3.internal.firrtl.ir.Block
 import firrtl.passes.wiring.{SinkAnnotation, SourceAnnotation}
@@ -299,7 +299,7 @@ case x @ (rhs, (module, conLoc)) =>
             }
              bore
             }
-            
+
             // Connect goes at destination if down, source if up.
             //createAndConnect
             if (Builder.currentModule.isEmpty || Builder.currentModule.contains(conLoc)/* || Builder.currentBlock.contains(module._block)*/) {
@@ -311,13 +311,17 @@ case x @ (rhs, (module, conLoc)) =>
               val rwprobeTime = createProbe.nonEmpty && createProbe.get.writable
               println(s"rwprobeTime: ${rwprobeTime}")
               val block = (up, conLoc == module || rwprobeTime) match {
-                // case (_, false) => module._block.get
+                case (_, false) => module._block.get
                 case (true, _) => 
                   rhs.topBindingOpt match {
-                    case Some(cd: ConditionalDeclarable) if cd.parentBlock.nonEmpty && !rwprobeTime => println(s"cd.parentBlock: ${cd.parentBlock}, ${cd.parentBlock.map(_.commands.result())})"); cd.parentBlock.get
-                    case _ => module.asInstanceOf[RawModule]._body
+                    // For ports, special case and reach to enclosing module to find block to use.
+                    // This won't support views-of-secret's, but maybe that's okay? :/
+                    case Some(spb: SecretPortBinding) if spb.enclosure._parent == Some(conLoc) && spb.enclosure._block.nonEmpty => spb.enclosure._block.get
+                    //case Some(cd: ConditionalDeclarable) if cd.parentBlock.nonEmpty && !rwprobeTime => println(s"cd.parentBlock: ${cd.parentBlock}, ${cd.parentBlock.map(_.commands.result())})"); cd.parentBlock.get
+                    case Some(cd: ConditionalDeclarable) if cd.parentBlock.nonEmpty => cd.parentBlock.get
+                    case _ => {println(s"BBBBBBBBBBBBBBBBBBBBB: using _body of module (UP) ${rhs.topBindingOpt}"); module.asInstanceOf[RawModule]._body }
                   }
-                case _ => module.asInstanceOf[RawModule]._body
+                case _ => {println("AAAAAAAAAAAAAAAAAAAAAA: using _body of module (DOWN)"); module.asInstanceOf[RawModule]._body }
               }
               // (up, conLoc == module) match {
               // case (true, 
