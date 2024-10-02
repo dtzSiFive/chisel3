@@ -669,9 +669,12 @@ private[chisel3] trait DataImpl extends HasId with NamedComponent { self: Data =
 
   private[chisel3] def isVisible: Boolean = isVisibleFromModule && visibleFromWhen.isEmpty
   private[chisel3] def isVisibleFromModule: Boolean = {
+    println(s"isVisibleFromModule: ${this}")
     val topBindingOpt = this.topBindingOpt // Only call the function once
     val mod = topBindingOpt.flatMap(_.location)
-    topBindingOpt match {
+    println(s"\tmod=${Some(mod)}")
+    println(s"\tcur=${Builder.currentModule}")
+    val result = topBindingOpt match {
       case Some(tb: TopBinding) if (mod == Builder.currentModule) => true
       case Some(pb: PortBinding)
           if mod.flatMap(Builder.retrieveParent(_, Builder.currentModule.get)) == Builder.currentModule =>
@@ -682,6 +685,8 @@ private[chisel3] trait DataImpl extends HasId with NamedComponent { self: Data =
       case Some(_: UnconstrainedBinding) => true
       case _ => false
     }
+    println(s"\t-> ${result}")
+    result
   }
   private[chisel3] def visibleFromWhen: Option[SourceInfo] = MonoConnect.checkWhenVisibility(this)
   private[chisel3] def requireVisible(): Unit = {

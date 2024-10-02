@@ -96,17 +96,20 @@ private[chisel3] object MonoConnect {
     // XXX: HACK: INCOMPLETE:
     def visible(b : Block) = Builder.hasDynamicContext && Builder.blockStack.contains(b)
     def visibleOpt(b : Option[Block]) = b.isEmpty || visible(b.get)
-    // println("VVVVVVVVVVVVVV")
-    // println(s"checkWhenVisibility(x = ${x}): topBinding=${x.topBinding}, cur=${Builder.currentModule},\n\tbs=${Builder.blockStack}\n\tbs=${Builder.blockStack.map(_.commands.result())} @ ${Builder.blockStack.map(_.sourceInfo)}")
+    def check(m : BaseModule) = { println(s"check(enc=${m})"); m match { case rm : RawModule => visible(rm._body)
+case _ => false } }
+    println("VVVVVVVVVVVVVV")
+    println(s"checkWhenVisibility(x = ${x}): topBinding=${x.topBinding}, cur=${Builder.currentModule},\n\tbs=${Builder.blockStack}\n\tbs=${Builder.blockStack.map(_.commands.result())} @ ${Builder.blockStack.map(_.sourceInfo)}")
+    println(s"x.topBinding: ${x.topBinding}")
     x.topBinding match {
       case mp: MemoryPortBinding =>
         None // TODO (albert-magyar): remove this "bridge" for odd enable logic of current CHIRRTL memories
       // TODO: Check if instance containing port is visible at current block.
-      case pb @ PortBinding(enc, b) if Builder.currentModule.isEmpty || Builder.currentModule.contains(enc) || visibleOpt(b) => None
-      case spb @ SecretPortBinding(enc, b) if Builder.currentModule.isEmpty || Builder.currentModule.contains(enc) || visibleOpt(b) => None
+      case pb @ PortBinding(enc, b) if Builder.currentModule.isEmpty || Builder.currentModule.contains(enc) || visibleOpt(b) || check(enc) => None
+      case spb @ SecretPortBinding(enc, b) if Builder.currentModule.isEmpty || Builder.currentModule.contains(enc) || visibleOpt(b) || check(enc) => None
       case _ : SecretPortBinding => println("SKIPPING VIS ON secret port!"); None
       // case _ : PortBinding | _ : SecretPortBinding => println(s"topBinding=${x.topBinding}, currentModule=${Builder.currentModule}"); None /* Skip all ports since doesn't work */
-      case cd: ConditionalDeclarable => cd.parentBlock.collect { case b: Block if !visible(b) => require(Builder.currentBlock.isDefined, "no current block"); /* println(s"XXXXXXXXXXXXX visibility of ${x} is ${b.sourceInfo} (${b} on CD, curB=${Builder.currentBlock})"); println(s"\t${Builder.currentBlock.get.sourceInfo}"); */ b.sourceInfo }
+      case cd: ConditionalDeclarable => println(s"cd.parentBlock: ${cd.parentBlock}"); cd.parentBlock.collect { case b: Block if !visible(b) => require(Builder.currentBlock.isDefined, "no current block"); println(s"XXXXXXXXXXXXX visibility of ${x} is ${b.sourceInfo} (${b} on CD, curB=${Builder.currentBlock})"); println(s"\t${Builder.currentBlock.get.sourceInfo}"); b.sourceInfo }
       case _ => None
     }
   }
