@@ -35,15 +35,15 @@ object DataMirrorSpec {
     DataMirror.getParent(inst) should be(Some(this))
     DataMirror.getParent(this) should be(Some(parent))
     DataMirror.isVisible(io) should be(true)
-    // DataMirror.isVisible(io.viewAs[Bool]) should be(true)
+    DataMirror.isVisible(io.viewAs[Bool]) should be(true)
     DataMirror.isVisible(internal) should be(true)
     DataMirror.isVisible(internal.viewAs[Bool]) should be(true)
     DataMirror.isVisible(inst.internal) should be(false)
     DataMirror.isVisible(inst.internal.viewAs[Bool]) should be(false)
     DataMirror.isVisible(underWhen) should be(false)
     DataMirror.isVisible(underWhen.viewAs) should be(false)
-    // DataMirror.isVisible(mixedView) should be(false)
-    // DataMirror.isVisible(mixedView._1) should be(true)
+    DataMirror.isVisible(mixedView) should be(false)
+    DataMirror.isVisible(mixedView._1) should be(true)
   }
   @instantiable
   class Parent extends Module {

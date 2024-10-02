@@ -27,7 +27,8 @@ object TestUtils {
   def getChirrtlAndAnnotations(gen: => RawModule, annos: AnnotationSeq = Seq()): (Circuit, Seq[Annotation]) = {
     val dir = createTestDirectory(this.getClass.getSimpleName).toString
     val processedAnnos = (new ChiselStage).execute(
-      Array("--full-stacktrace", "--throw-on-first-error", "--target-dir", dir, "--target", "chirrtl"),
+      // Array("--full-stacktrace", "--throw-on-first-error", "--target-dir", dir, "--target", "chirrtl"),
+      Array("--target-dir", dir, "--target", "chirrtl"),
       ChiselGeneratorAnnotation(() => gen) +: annos
     )
 
