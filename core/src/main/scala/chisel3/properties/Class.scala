@@ -74,8 +74,8 @@ class Class extends BaseModule {
   }
 
   // HACK
-  Builder.blockStack = Nil
-  // Builder.pushBlock(_body)
+  // Builder.blockStack = Nil
+  require(Builder.blockStack == Nil, "non-nil block stack during construction of class")
 
   private[chisel3] override def initializeInParent(): Unit = ()
 
@@ -96,8 +96,10 @@ class Class extends BaseModule {
   private val _body = new Block(UnlocatableSourceInfo, None /* object command! */)
   private def addCommandImpl(c: Command): Unit = {
     require(!_closed, "Can't write to Class after close")
+    require(Builder.currentBlock == Some(_body), "can't add commands to blocks that aren't the body")
     _body.addCommand(c)
   }
+  Builder.pushBlock(_body)
 }
 
 /** Represent a Class type for referencing a Class in a Property[ClassType]
