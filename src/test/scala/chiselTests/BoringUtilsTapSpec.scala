@@ -906,14 +906,12 @@ class BoringUtilsTapSpec extends ChiselFlatSpec with ChiselRunners with Utils wi
       val in = IO(Input(UInt(8.W)))
       val out = IO(Output(UInt(8.W)))
 
-      var c: Bool = null
+      var c: Child = null
       when (true.B) {
-        c = WireInit(Bool(), true.B)
-        out := c
-      } .otherwise {
-        c := false.B
-        out := c
+        c = Module(new Child)
       }
+      c.in := in
+      out := c.out
     }
     val e = the[ChiselException] thrownBy circt.stage.ChiselStage.emitCHIRRTL(new Foo)
     e.getMessage should include("ASDF: port exception")
