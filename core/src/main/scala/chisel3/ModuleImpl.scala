@@ -485,16 +485,7 @@ package experimental {
       readyForModuleConstr = false
 
       Builder.currentModule = Some(this)
-      //Builder.whenStack = Nil
-      //println(s"bs=${blockStack} (_block=${_block}")
-      //if (Builder.blockStack == Nil) {
-      //  println(s"this=${this}")
-      //}
-      // TODO: Revisit!!
       Builder.blockStack = Nil
-      // require(Builder.blockStack != Nil, "bs is Nil")
-      //Builder.blockStack = Nil
-      //Builder.pushBlock(Builder.forcedUserModule._body)
       Builder.layerStack = layer.Layer.root :: Nil
     }
 
@@ -835,8 +826,7 @@ package experimental {
       // Assign any signals (Chisel or chisel3) with Unspecified/Flipped directions to Output/Input.
       Module.assignCompatDir(iodef)
 
-      // TODO: revisit this!!
-      println(s"bindIOInPlace!! iodef=${iodef}")
+      // TODO: revisit this!! PortBinding parentBlock as module's instantiating block.
       iodef.bind(PortBinding(this, _block))
       _ports += iodef -> sourceInfo
     }
@@ -856,7 +846,7 @@ package experimental {
       require(!isFullyClosed, "Cannot create secret ports if module is fully closed")
 
       Module.assignCompatDir(iodef)
-      // TODO: revisit this!!
+      // TODO: revisit this!! (Secret)PortBinding parentBlock as module's instantiating block.
       iodef.bind(SecretPortBinding(this, _block), iodef.specifiedDirection)
       iodef
     }
