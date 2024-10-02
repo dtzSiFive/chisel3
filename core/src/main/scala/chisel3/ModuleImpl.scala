@@ -105,15 +105,9 @@ private[chisel3] trait ObjectModuleImpl {
       Builder.components += component
     }
 
-    // println("component generated, maybe")
     if (Builder.blockDepth == 1) {
       Builder.popBlock()
       println("block stack now empty! YYYYYYYYYYYYYY")
-      // require(Builder.currentBlock == parentBlockStack.headOption, "popped but result doesn't match")
-    }
-
-    if (Builder.blockDepth != 0) {
-      throwException("Internal Error! block scope depth is != 0, this should have been caught!")
     }
 
     // Reset Builder state *after* generating the component, so any atModuleBodyEnd generators are still within the
@@ -183,13 +177,13 @@ private[chisel3] trait ObjectModuleImpl {
   ): T = {
     // println(s"do_pseudo_apply BEGIN \\\\ current=${Builder.currentModule}, this=${this}")
     val parent = Builder.currentModule
-    val blockStack = if (Builder.hasDynamicContext) Builder.blockStack else Nil
+    /// val blockStack = if (Builder.hasDynamicContext) Builder.blockStack else Nil
     val module: T = bc // bc is actually evaluated here
     if (!parent.isEmpty) { Builder.currentModule = parent }
-    if (Builder.hasDynamicContext) {
-      // println(s"do_pseudo_apply\n\told BS=${blockStack}\n\tnew BS=${Builder.blockStack}")
-        Builder.blockStack = blockStack
-    }
+    // if (Builder.hasDynamicContext) {
+    //   // println(s"do_pseudo_apply\n\told BS=${blockStack}\n\tnew BS=${Builder.blockStack}")
+    //     Builder.blockStack = blockStack
+    // }
     // println(s"do_pseudo_apply   END // current=${Builder.currentModule}, this=${this}")
 
     module
