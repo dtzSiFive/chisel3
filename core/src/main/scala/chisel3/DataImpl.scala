@@ -767,7 +767,7 @@ private[chisel3] trait DataImpl extends HasId with NamedComponent { self: Data =
 
   // Recursively set the parentBlock of the start Data and any children (eg. in an Aggregate)
   private[chisel3] def setAllParentBlocks(parentBlock: Option[Block]): Unit =
-    DataMirror.collectAllMembers(this).foreach { case x : HasId => x._block = parentBlock }
+    DataMirror.collectAllMembers(this).foreach { _._block = parentBlock }
 
   private[chisel3] def width: Width
   private[chisel3] def firrtlConnect(that: Data)(implicit sourceInfo: SourceInfo): Unit
