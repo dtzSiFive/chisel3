@@ -102,7 +102,7 @@ abstract class RawModule extends BaseModule {
   private[chisel3] def addCommand(c: Command): Unit = {
     require(!_closed, "Can't write to module after module close")
     require(Builder.currentBlock.isDefined, "must have block set")
-    Builder.currentBlock.addCommand(c)
+    Builder.currentBlock.get.addCommand(c)
   }
   protected def getCommands: Seq[Command] = {
     require(_closed, "Can't get commands before module close")
