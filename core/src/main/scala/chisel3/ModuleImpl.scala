@@ -461,6 +461,9 @@ package experimental {
    // Modules that contain bodies should override this.
    private[chisel3] def getBody : Option[Block] = None
 
+   // Return Block containing the instance of this module.
+   // protected def getInstantiatingBlock : Option[Block] = _block
+
     //
     // Builder Internals - this tracks which Module RTL construction belongs to.
     //
