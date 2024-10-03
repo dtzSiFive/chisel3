@@ -15,6 +15,7 @@ object attach {
 
   // Actual implementation
   private[chisel3] def impl(elts: Seq[Analog], contextModule: RawModule)(implicit sourceInfo: SourceInfo): Unit = {
+    if (Builder.whenDepth != 0) throw ConditionalAttachException
     // TODO: fixup exception message
     if (Builder.blockDepth > 1) throw ConditionalAttachException
 

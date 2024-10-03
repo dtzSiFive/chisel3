@@ -823,8 +823,6 @@ private[chisel3] object Builder extends LazyLogging {
       case _ => None
   }
 
-  //def currentWhen: Option[WhenContext] = dynamicContext.whenStack.headOption
-
   // Helper for reasonable errors when clock or reset value not yet initialized
   private def getDelayed[A](field: String, dc: Delayed[A]): A = {
     val result = dc.value

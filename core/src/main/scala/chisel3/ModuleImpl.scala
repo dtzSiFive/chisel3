@@ -60,6 +60,7 @@ private[chisel3] trait ObjectModuleImpl {
     Builder.readyForModuleConstr = true
 
     val parent = Builder.currentModule
+    val parentWhenStack = Builder.whenStack
     val parentBlockStack = Builder.blockStack
     val parentLayerStack = Builder.layerStack
 
@@ -76,16 +77,19 @@ private[chisel3] trait ObjectModuleImpl {
     val saveEnabledLayers = Builder.enabledLayers
     Builder.enabledLayers = LinkedHashSet.empty
 
-
     // Execute the module, this has the following side effects:
     //   - set currentModule
     //   - unset readyForModuleConstr
+    //   - reset whenStack to be empty
     //   - reset blockStack to body or empty if none
     //   - reset layerStack to be root :: nil
     //   - set currentClockAndReset
     val module: T = bc // bc is actually evaluated here
 
     require(Builder.blockDepth == module.getBody.size, "block leftover")
+    if (Builder.whenDepth != 0) {
+      throwException("Internal Error! when() scope depth is != 0, this should have been caught!")
+    }
     if (Builder.readyForModuleConstr) {
       throwException(
         "Error: attempted to instantiate a Module, but nothing happened. " +
@@ -103,6 +107,7 @@ private[chisel3] trait ObjectModuleImpl {
     // Reset Builder state *after* generating the component, so any atModuleBodyEnd generators are still within the
     // scope of the current Module.
     Builder.currentModule = parent // Back to parent!
+    Builder.whenStack = parentWhenStack
     Builder.blockStack = parentBlockStack
     Builder.layerStack = parentLayerStack
     Builder.currentClock = saveClock // Back to clock and reset scope
@@ -474,6 +479,7 @@ package experimental {
       readyForModuleConstr = false
 
       Builder.currentModule = Some(this)
+      Builder.whenStack = Nil
       Builder.blockStack = Nil
       getBody.map(Builder.pushBlock(_))
       Builder.layerStack = layer.Layer.root :: Nil
