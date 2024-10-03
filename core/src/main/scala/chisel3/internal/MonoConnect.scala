@@ -108,6 +108,7 @@ private[chisel3] object MonoConnect {
     x.topBinding match {
       case mp: MemoryPortBinding =>
         None // TODO (albert-magyar): remove this "bridge" for odd enable logic of current CHIRRTL memories
+/*
       // TODO: Check if instance containing port is visible at current block.
       case pb @ PortBinding(enc) if Builder.currentModule.isEmpty || Builder.currentModule.contains(enc) || check(enc) => None
       case spb @ SecretPortBinding(enc) if Builder.currentModule.isEmpty || Builder.currentModule.contains(enc) || check(enc) => None
@@ -117,6 +118,7 @@ private[chisel3] object MonoConnect {
       // case _ : SecretPortBinding => println("SKIPPING VIS ON secret port!"); None
       // // case _ : PortBinding | _ : SecretPortBinding => println(s"topBinding=${x.topBinding}, currentModule=${Builder.currentModule}"); None /* Skip all ports since doesn't work */
       // // case cd: ConditionalDeclarable => println(s"cd.parentBlock: ${cd.parentBlock}"); cd.parentBlock.collect { case b: Block if !visible(b) => require(Builder.currentBlock.isDefined, "no current block"); println(s"XXXXXXXXXXXXX visibility of ${x} is ${b.sourceInfo} (${b} on CD, curB=${Builder.currentBlock})"); println(s"\t${Builder.currentBlock.get.sourceInfo}"); b.sourceInfo }
+*/
       case cd: ConditionalDeclarable => cd.parentBlock.collect { case b: Block if !visible(b) => require(Builder.currentBlock.isDefined, "no current block"); b.sourceInfo }
       case _ => None
     }
