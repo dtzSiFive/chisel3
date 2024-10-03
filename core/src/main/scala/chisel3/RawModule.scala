@@ -108,15 +108,10 @@ abstract class RawModule extends BaseModule {
 */
 
   private[chisel3] def withRegion[A](newRegion: Block)(thunk: => A): A = {
-    // var oldRegion = _currentRegion
-    //_currentRegion.commands ++= stagedSecretCommands
-    //stagedSecretCommands.clear()
     val curBlock = Builder.currentBlock
     Builder.pushBlock(newRegion)
     require(Builder.currentBlock == Some(newRegion), "pushBlock didn't work as expected")
     val result = thunk
-    //_currentRegion.commands ++= stagedSecretCommands
-    //stagedSecretCommands.clear()
     require(Builder.currentBlock == Some(newRegion), "withRegion changed block")
     Builder.popBlock()
     require(Builder.currentBlock == curBlock, "popBlock didn't work as expected")
@@ -188,7 +183,7 @@ abstract class RawModule extends BaseModule {
             id.forceName(default = "_T", _namespace)
           case MemoryPortBinding(_, _) =>
             id.forceName(default = "MPORT", _namespace)
-          case PortBinding(_, _) =>
+          case PortBinding(_) =>
             id.forceName(default = "PORT", _namespace, true, x => ModuleIO(this, x))
           case RegBinding(_, _) =>
             id.forceName(default = "REG", _namespace)
@@ -287,6 +282,8 @@ abstract class RawModule extends BaseModule {
     //require(!_closed, "must not be closed")
     val block = if (_closed && Builder.currentBlock == Some(_body)) _component.get.asInstanceOf[DefModule].secretCommands else Builder.currentBlock.get.commands
     block += rhs
+
+
     //Builder.currentBlock.get.commands += rhs
     //val secretCommands = if (_closed) {
     //  _component.get.asInstanceOf[DefModule].secretCommands

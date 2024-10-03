@@ -364,7 +364,7 @@ private[chisel3] trait DataImpl extends HasId with NamedComponent { self: Data =
   override def autoSeed(name: String): this.type = {
     topBindingOpt match {
       // Ports are special in that the autoSeed will keep the first name, not the last name
-      case Some(PortBinding(m, _)) if hasSeed && Builder.currentModule.contains(m) => this
+      case Some(PortBinding(m)) if hasSeed && Builder.currentModule.contains(m) => this
       case _                                                                    => super.autoSeed(name)
     }
   }
@@ -492,8 +492,8 @@ private[chisel3] trait DataImpl extends HasId with NamedComponent { self: Data =
     topBindingOpt match {
       case OpBinding(_, _)           => "OpResult"
       case MemoryPortBinding(_, _)   => "MemPort"
-      case PortBinding(_, _)            => "IO"
-      case SecretPortBinding(_, _)      => "IO"
+      case PortBinding(_)            => "IO"
+      case SecretPortBinding(_)      => "IO"
       case RegBinding(_, _)          => "Reg"
       case WireBinding(_, _)         => "Wire"
       case DontCareBinding()         => "(DontCare)"
@@ -669,12 +669,9 @@ private[chisel3] trait DataImpl extends HasId with NamedComponent { self: Data =
 
   private[chisel3] def isVisible: Boolean = isVisibleFromModule && visibleFromWhen.isEmpty
   private[chisel3] def isVisibleFromModule: Boolean = {
-    // println(s"isVisibleFromModule: ${this}")
     val topBindingOpt = this.topBindingOpt // Only call the function once
     val mod = topBindingOpt.flatMap(_.location)
-    //println(s"\tmod=${Some(mod)}")
-    //println(s"\tcur=${Builder.currentModule}")
-    val result = topBindingOpt match {
+    topBindingOpt match {
       case Some(tb: TopBinding) if (mod == Builder.currentModule) => true
       case Some(pb: PortBinding)
           if mod.flatMap(Builder.retrieveParent(_, Builder.currentModule.get)) == Builder.currentModule =>
@@ -685,8 +682,6 @@ private[chisel3] trait DataImpl extends HasId with NamedComponent { self: Data =
       case Some(_: UnconstrainedBinding) => true
       case _ => false
     }
-    //println(s"\t-> ${result}")
-    result
   }
   private[chisel3] def visibleFromWhen: Option[SourceInfo] = MonoConnect.checkWhenVisibility(this)
   private[chisel3] def requireVisible(): Unit = {

@@ -228,7 +228,6 @@ object BoringUtils {
     implicit si: SourceInfo
   ): A = {
     def parent(d: Data): BaseModule = d.topBinding.location.get
-    def parentBlock(d: Data) = d.topBindingOpt.asInstanceOf[ConditionalDeclarable].parentBlock
     def purePortTypeBase = if (createProbe.nonEmpty) Output(chiselTypeOf(source))
     else if (DataMirror.hasOuterFlip(source)) Flipped(chiselTypeOf(source))
     else chiselTypeOf(source)
@@ -243,8 +242,7 @@ object BoringUtils {
       case None => purePortTypeBase
     }
     def isPort(d: Data): Boolean = d.topBindingOpt match {
-      // case Some(PortBinding(_, b)) => { println(s"isPort(d=${d}), block=${b} (${b.map(_.commands)})"); true }
-      case Some(PortBinding(_, _)) => true
+      case Some(PortBinding(_)) => true
       case _                    => false
     }
     def isDriveDone(d: Data): Boolean = {
@@ -258,22 +256,20 @@ object BoringUtils {
       }
     }
     def drill(source: A, path: Seq[BaseModule], connectionLocation: Seq[BaseModule], up: Boolean): A = {
-      println(path.zip(connectionLocation))
       path.zip(connectionLocation).foldLeft(source) {
-case x @ (rhs, (module, conLoc)) =>
-  println(s"rhs=${rhs}, module=${module}, conLoc=${conLoc}")
-  rhs.topBindingOpt match {
-    case Some(cd: ConditionalDeclarable) => println(s"CD binding on rhs=${rhs}, block=${cd.parentBlock} (${cd.parentBlock.map(_.commands.result())})")
-    case _ => ()
-  }
-  x match {
+//case x @ (rhs, (module, conLoc)) =>
+//  println(s"rhs=${rhs}, module=${module}, conLoc=${conLoc}")
+//  rhs.topBindingOpt match {
+//    case Some(cd: ConditionalDeclarable) => println(s"CD binding on rhs=${rhs}, block=${cd.parentBlock} (${cd.parentBlock.map(_.commands.result())})")
+//    case _ => ()
+//  }
+//  x match {
         case (rhs, (module, conLoc)) if (module.isFullyClosed) => boringError(module); DontCare.asInstanceOf[A]
         case (rhs, (module, _))
             if ((up || isDriveDone(rhs)) && module == path(0) && isPort(rhs) &&
               (!createProbe.nonEmpty || !createProbe.get.writable)) => {
           // When drilling from the original source, or driving to the sink, if it's already a port just return it.
           // As an exception, insist rwTaps are done from within the module and exported out.
-          // require(false, "testing")
           rhs
         }
         case (rhs, (module, conLoc)) =>
@@ -331,7 +327,7 @@ case x @ (rhs, (module, conLoc)) =>
             }
           }
       }
-}
+// }
     }
 
     requireIsHardware(source)

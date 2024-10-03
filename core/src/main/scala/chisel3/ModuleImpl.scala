@@ -80,12 +80,12 @@ private[chisel3] trait ObjectModuleImpl {
     // Execute the module, this has the following side effects:
     //   - set currentModule
     //   - unset readyForModuleConstr
-    //   - reset blockStack to be empty
+    //   - reset blockStack to body or empty if none
     //   - reset layerStack to be root :: nil
     //   - set currentClockAndReset
     val module: T = bc // bc is actually evaluated here
 
-    require(Builder.blockDepth <= 1, "body leftover")
+    require(Builder.blockDepth == module.getBody.size, "block leftover")
     if (Builder.readyForModuleConstr) {
       throwException(
         "Error: attempted to instantiate a Module, but nothing happened. " +
@@ -98,10 +98,6 @@ private[chisel3] trait ObjectModuleImpl {
     val componentOpt = module.generateComponent()
     for (component <- componentOpt) {
       Builder.components += component
-    }
-
-    if (Builder.blockDepth == 1) {
-      Builder.popBlock()
     }
 
     // Reset Builder state *after* generating the component, so any atModuleBodyEnd generators are still within the
@@ -378,7 +374,7 @@ package internal {
       // does not recursively copy the right specifiedDirection,
       // still need to fix it up here.
       Module.assignCompatDir(clonePorts)
-      clonePorts.bind(PortBinding(cloneParent, /*block=*/None))
+      clonePorts.bind(PortBinding(cloneParent))
       clonePorts.setAllParents(Some(cloneParent))
       // TODO: revisit?
       clonePorts.setAllParentBlocks(None)
@@ -820,9 +816,7 @@ package experimental {
       // Assign any signals (Chisel or chisel3) with Unspecified/Flipped directions to Output/Input.
       Module.assignCompatDir(iodef)
 
-      // TODO: revisit this!! PortBinding parentBlock as module's instantiating block.
-      // vs "None" vs body! vs dropping it
-      iodef.bind(PortBinding(this, None))
+      iodef.bind(PortBinding(this))
       _ports += iodef -> sourceInfo
     }
 
@@ -841,9 +835,7 @@ package experimental {
       require(!isFullyClosed, "Cannot create secret ports if module is fully closed")
 
       Module.assignCompatDir(iodef)
-      // TODO: revisit this!! (Secret)PortBinding parentBlock as module's instantiating block.
-      // vs "None" vs body! vs dropping it
-      iodef.bind(SecretPortBinding(this, None), iodef.specifiedDirection)
+      iodef.bind(SecretPortBinding(this), iodef.specifiedDirection)
       iodef
     }
 

@@ -73,10 +73,10 @@ private[chisel3] object binding {
 
   // TODO(twigg): Ops between unenclosed nodes can also be unenclosed
   // However, Chisel currently binds all op results to a module
-  case class PortBinding(enclosure: BaseModule, parentBlock: Option[Block]) extends ConstrainedBinding with ConditionalDeclarable
+  case class PortBinding(enclosure: BaseModule) extends ConstrainedBinding
 
   // Added to handle BoringUtils in Chisel
-  case class SecretPortBinding(enclosure: BaseModule, parentBlock: Option[Block]) extends ConstrainedBinding with ConditionalDeclarable
+  case class SecretPortBinding(enclosure: BaseModule) extends ConstrainedBinding
 
   case class OpBinding(enclosure: RawModule, parentBlock: Option[Block])
       extends ConstrainedBinding

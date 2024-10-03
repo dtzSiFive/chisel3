@@ -67,7 +67,7 @@ class Class extends BaseModule {
     }
 
     // Save the Component.
-    _component = Some(DefClass(this, name, ports, _body.commands.result()))
+    _component = Some(DefClass(this, name, ports, _body.getCommands()))
 
     // Return the Component.
     _component

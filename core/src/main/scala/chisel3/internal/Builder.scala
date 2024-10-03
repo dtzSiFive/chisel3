@@ -682,8 +682,8 @@ private[chisel3] object Builder extends LazyLogging {
             getSubName(data).map(p + "_" + _).getOrElse(p)
           }
         case SampleElementBinding(parent)                            => recData(parent)
-        case PortBinding(mod, _) if Builder.currentModule.contains(mod) => data.seedOpt
-        case PortBinding(mod, _)                                        => map2(mod.seedOpt, data.seedOpt)(_ + "_" + _)
+        case PortBinding(mod) if Builder.currentModule.contains(mod) => data.seedOpt
+        case PortBinding(mod)                                        => map2(mod.seedOpt, data.seedOpt)(_ + "_" + _)
         case (_: LitBinding | _: DontCareBinding) => None
         case _ => Some("view_") // TODO implement
       }
