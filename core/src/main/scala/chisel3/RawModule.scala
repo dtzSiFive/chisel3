@@ -113,7 +113,8 @@ abstract class RawModule extends BaseModule {
     require(_closed, "Can't get commands before module close")
     // Unsafe cast but we know that any RawModule uses a DefModule
     // _component is defined as a var on BaseModule and we cannot override mutable vars
-    _component.get.asInstanceOf[DefModule].commands
+    //_component.get.asInstanceOf[DefModule].commands
+    _body.getCommands()
   }
 
   //
@@ -217,7 +218,7 @@ abstract class RawModule extends BaseModule {
     // Generate IO invalidation commands to initialize outputs as unused,
     //  unless the client wants explicit control over their generation.
     val component =
-      DefModule(this, name, _isPublic, Builder.enabledLayers.toSeq, firrtlPorts, _body.getCommands())
+      DefModule(this, name, _isPublic, Builder.enabledLayers.toSeq, firrtlPorts, _body)
 
     // Secret connections can be staged if user bored into children modules
     //component.secretCommands ++= stagedSecretCommands
@@ -268,8 +269,7 @@ abstract class RawModule extends BaseModule {
 
     val rhs = computeConnection(left, right)
     //require(!_closed, "must not be closed")
-    val block = if (_closed && Builder.currentBlock == Some(_body)) _component.get.asInstanceOf[DefModule].secretCommands else Builder.currentBlock.get.commands
-    block += rhs
+    Builder.currentBlock.get.addCommand(rhs)
 
 
     //Builder.currentBlock.get.commands += rhs

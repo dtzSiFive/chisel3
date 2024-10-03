@@ -394,14 +394,14 @@ private[chisel3] object Converter {
   }
 
   def convert(component: Component, typeAliases: Seq[String]): fir.DefModule = component match {
-    case ctx @ DefModule(id, name, public, layers, ports, cmds) =>
+    case ctx @ DefModule(id, name, public, layers, ports, block) =>
       fir.Module(
         convert(id._getSourceLocator),
         name,
         public,
         layers.map(_.fullName),
         (ports ++ ctx.secretPorts).map(p => convert(p, typeAliases)),
-        convert(cmds ++ ctx.secretCommands, ctx, typeAliases)
+        convert(block.getCommands(), ctx, typeAliases)
       )
     case ctx @ DefBlackBox(id, name, ports, topDir, params) =>
       fir.ExtModule(
@@ -419,12 +419,12 @@ private[chisel3] object Converter {
         id.intrinsic,
         params.keys.toList.sorted.map { name => convert(name, params(name)) }
       )
-    case ctx @ DefClass(id, name, ports, cmds) =>
+    case ctx @ DefClass(id, name, ports, block) =>
       fir.DefClass(
         convert(id._getSourceLocator),
         name,
         (ports ++ ctx.secretPorts).map(p => convert(p, typeAliases)),
-        convert(cmds, ctx, typeAliases)
+        convert(block.getCommands(), ctx, typeAliases)
       )
   }
 

@@ -1141,7 +1141,7 @@ private[chisel3] object Builder extends LazyLogging {
           components.update(
             components.size - 1, {
               val newModule = module.copy(isPublic = true)
-              newModule.secretCommands ++= module.secretCommands
+              // newModule.secretCommands ++= module.secretCommands
               newModule
             }
           )

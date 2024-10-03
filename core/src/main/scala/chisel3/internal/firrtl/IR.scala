@@ -456,10 +456,8 @@ private[chisel3] object ir {
     isPublic: Boolean,
     layers:   Seq[chisel3.layer.Layer],
     ports:    Seq[Port],
-    commands: Seq[Command])
-      extends Component {
-    val secretCommands: mutable.ArrayBuffer[Command] = mutable.ArrayBuffer[Command]()
-  }
+    block:    Block)
+      extends Component
 
   case class DefBlackBox(
     id:     BaseBlackBox,
@@ -488,7 +486,7 @@ private[chisel3] object ir {
   case class DefIntrinsic(sourceInfo: SourceInfo, intrinsic: String, args: Seq[Arg], params: Seq[(String, Param)])
       extends Command
 
-  case class DefClass(id: Class, name: String, ports: Seq[Port], commands: Seq[Command]) extends Component
+  case class DefClass(id: Class, name: String, ports: Seq[Port], block: Block) extends Component
 
   case class Circuit(
     name:           String,
