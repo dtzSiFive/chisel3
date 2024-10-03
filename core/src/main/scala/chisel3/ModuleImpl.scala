@@ -459,8 +459,8 @@ package experimental {
     final val definitionIdentifier = _definitionIdentifier
 
 
-   // Modules that contain bodies should override this.
-   private[chisel3] def getBody : Option[Block] = None
+    // Modules that contain bodies should override this.
+    private[chisel3] def getBody : Option[Block] = None
 
    // Return Block containing the instance of this module.
    // protected def getInstantiatingBlock : Option[Block] = _block
