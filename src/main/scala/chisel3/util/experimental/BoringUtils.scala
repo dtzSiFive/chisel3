@@ -319,9 +319,9 @@ case x @ (rhs, (module, conLoc)) =>
                     case Some(spb: SecretPortBinding) if spb.enclosure._parent == Some(conLoc) && spb.enclosure._block.nonEmpty => spb.enclosure._block.get
                     //case Some(cd: ConditionalDeclarable) if cd.parentBlock.nonEmpty && !rwprobeTime => println(s"cd.parentBlock: ${cd.parentBlock}, ${cd.parentBlock.map(_.commands.result())})"); cd.parentBlock.get
                     case Some(cd: ConditionalDeclarable) if cd.parentBlock.nonEmpty => cd.parentBlock.get
-                    case _ => {println(s"BBBBBBBBBBBBBBBBBBBBB: using _body of module (UP) ${rhs.topBindingOpt}"); module.asInstanceOf[RawModule]._body }
+                    case _ => {println(s"BBBBBBBBBBBBBBBBBBBBB: using _body of module (UP) ${rhs.topBindingOpt}"); module.getBody.get }
                   }
-                case _ => {println("AAAAAAAAAAAAAAAAAAAAAA: using _body of module (DOWN)"); module.asInstanceOf[RawModule]._body }
+                case _ => {println("AAAAAAAAAAAAAAAAAAAAAA: using _body of module (DOWN)"); module.getBody.get }
               }
               // (up, conLoc == module) match {
               // case (true, 

@@ -96,8 +96,12 @@ private[chisel3] object MonoConnect {
     // XXX: HACK: INCOMPLETE:
     def visible(b : Block) = Builder.hasDynamicContext && Builder.blockStack.contains(b)
     def visibleOpt(b : Option[Block]) = b.isEmpty || visible(b.get)
-    def check(m : BaseModule) = { println(s"check(enc=${m})"); m match { case rm : RawModule => visible(rm._body)
-case _ => false } }
+    // def check(m : BaseModule) = { println(s"check(enc=${m})"); m match { case rm : RawModule => visible(rm._body)
+    def check(m : BaseModule) = { println(s"check(enc=${m})");
+      m.getBody.map(visible(_)).getOrElse(false)
+}
+// m match { case rm : RawModule => visible(rm._body)
+//case _ => false } }
     //println("VVVVVVVVVVVVVV")
     //println(s"checkWhenVisibility(x = ${x}): topBinding=${x.topBinding}, cur=${Builder.currentModule},\n\tbs=${Builder.blockStack}\n\tbs=${Builder.blockStack.map(_.commands.result())} @ ${Builder.blockStack.map(_.sourceInfo)}")
     //println(s"x.topBinding: ${x.topBinding}")

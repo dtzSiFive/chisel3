@@ -84,12 +84,14 @@ abstract class RawModule extends BaseModule {
   //
   // RTL construction internals
   //
-  /* private */ val _body = new Block(UnlocatableSourceInfo, None /* instance command?*/)
+  private lazy val _body = new Block(UnlocatableSourceInfo, None /* instance command?*/)
+  private[chisel3] override def getBody : Option[Block] = Some(_body)
+
   // println("RawModule, resetting block stack...")
 
   // TODO: Add body as part of evaluation?
-  require(Builder.blockStack == Nil, "non-empty block stack in RawModule body")
-  Builder.pushBlock(_body)
+  //require(Builder.blockStack == Nil, "non-empty block stack in RawModule body")
+  //Builder.pushBlock(_body)
 
   /** The current region to which commands will be added. */
   private def _currentRegion = {

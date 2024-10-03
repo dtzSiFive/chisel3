@@ -456,6 +456,11 @@ package experimental {
 
     /** Represents an eagerly-determined unique and descriptive identifier for this module */
     final val definitionIdentifier = _definitionIdentifier
+
+
+   // Modules that contain bodies should override this.
+   private[chisel3] def getBody : Option[Block] = None
+
     //
     // Builder Internals - this tracks which Module RTL construction belongs to.
     //
@@ -471,6 +476,7 @@ package experimental {
 
       Builder.currentModule = Some(this)
       Builder.blockStack = Nil
+      getBody.map(Builder.pushBlock(_))
       Builder.layerStack = layer.Layer.root :: Nil
     }
 
