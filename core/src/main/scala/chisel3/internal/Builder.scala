@@ -800,7 +800,7 @@ private[chisel3] object Builder extends LazyLogging {
     dynamicContext.whenStack = s
   }
 
-  //def currentWhen: Option[WhenContext] = dynamicContext.whenStack.headOption
+  def currentWhen: Option[WhenContext] = dynamicContext.whenStack.headOption
 
   def blockStack : List[Block] = dynamicContext.blockStack
   def blockStack_=(s: List[Block]): Unit = {

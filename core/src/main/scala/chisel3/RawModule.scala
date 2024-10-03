@@ -215,8 +215,6 @@ abstract class RawModule extends BaseModule {
       DefModule(this, name, _isPublic, Builder.enabledLayers.toSeq, firrtlPorts, _body)
 
     // Secret connections can be staged if user bored into children modules
-    //component.secretCommands ++= stagedSecretCommands
-    //stagedSecretCommands.clear()
     _component = Some(component)
     _component
   }
@@ -261,18 +259,8 @@ abstract class RawModule extends BaseModule {
     }
 
     val rhs = computeConnection(left, right)
-    //require(!_closed, "must not be closed")
+    // TODO: Add as "staged" command, for later inclusion
     Builder.currentBlock.get.addCommand(rhs)
-
-
-    //Builder.currentBlock.get.commands += rhs
-    //val secretCommands = if (_closed) {
-    //  _component.get.asInstanceOf[DefModule].secretCommands
-    //} else {
-    //  Builder.currentBlock.get.commands
-    //}
-    //secretCommands += rhs
-    //require(_closed || Builder.currentBlock.get.commands.result().contains(rhs), "failed to add")
   }
 
   private[chisel3] def initializeInParent(): Unit = {}
