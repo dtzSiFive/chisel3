@@ -73,10 +73,6 @@ class Class extends BaseModule {
     _component
   }
 
-  // HACK
-  // Builder.blockStack = Nil
-  // require(Builder.blockStack == Nil, "non-nil block stack during construction of class")
-
   private[chisel3] override def initializeInParent(): Unit = ()
 
   /** Add a PropAssign command to the Class

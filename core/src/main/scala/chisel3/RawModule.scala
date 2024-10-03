@@ -87,25 +87,12 @@ abstract class RawModule extends BaseModule {
   private lazy val _body = new Block(UnlocatableSourceInfo, None /* instance command?*/)
   private[chisel3] override def getBody : Option[Block] = Some(_body)
 
-  // println("RawModule, resetting block stack...")
-
-  // TODO: Add body as part of evaluation?
-  //require(Builder.blockStack == Nil, "non-empty block stack in RawModule body")
-  //Builder.pushBlock(_body)
 
   /** The current region to which commands will be added. */
   private def _currentRegion = {
     require(Builder.currentBlock.isDefined, "must be have block set")
     Builder.currentBlock.get
   }
-
-/*
-  private[chisel3] def changeRegion(newRegion: Block): Unit = {
-    _currentRegion.commands ++= stagedSecretCommands
-    stagedSecretCommands.clear()
-    _currentRegion = newRegion
-  }
-*/
 
   private[chisel3] def withRegion[A](newRegion: Block)(thunk: => A): A = {
     val curBlock = Builder.currentBlock
@@ -245,6 +232,7 @@ abstract class RawModule extends BaseModule {
     // Okay, where to put the new command?
     // Trust user that somewhere in this module makes sense.
     // Need both left and right to be visible.
+    // TODO: Sort out where to put connection as part of this method?
 
     val (right: Data, _) = chisel3.experimental.dataview
       .reifyIdentityView(_right)

@@ -895,7 +895,6 @@ private[chisel3] object Builder extends LazyLogging {
   // TODO(twigg): Ideally, binding checks and new bindings would all occur here
   // However, rest of frontend can't support this yet.
   def pushCommand[T <: Command](c: T): T = {
-    // println(s"${forcedUserModule}, command=${c}")
     forcedUserModule.addCommand(c)
     c
   }

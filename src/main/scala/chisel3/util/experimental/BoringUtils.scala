@@ -438,9 +438,7 @@ object BoringUtils {
     val tapIntermediate = skipPrefix {
       boreOrTap(source, createProbe = Some(ProbeInfo(writable = false, color = None)))
     }
-    println(s"tapAndRead, after boreOrTap: ${tapIntermediate}")
     if (tapIntermediate.probeInfo.nonEmpty) {
-      println("read!")
       probe.read(tapIntermediate)
     } else {
       tapIntermediate
