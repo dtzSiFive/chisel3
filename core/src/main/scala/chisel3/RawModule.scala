@@ -88,12 +88,6 @@ abstract class RawModule extends BaseModule {
   private[chisel3] override def getBody : Option[Block] = Some(_body)
 
 
-  /** The current region to which commands will be added. */
-  private def _currentRegion = {
-    require(Builder.currentBlock.isDefined, "must be have block set")
-    Builder.currentBlock.get
-  }
-
   private[chisel3] def withRegion[A](newRegion: Block)(thunk: => A): A = {
     val curBlock = Builder.currentBlock
     Builder.pushBlock(newRegion)
@@ -107,13 +101,13 @@ abstract class RawModule extends BaseModule {
 
   private[chisel3] def addCommand(c: Command): Unit = {
     require(!_closed, "Can't write to module after module close")
-    _currentRegion.addCommand(c)
+    require(Builder.currentBlock.isDefined, "must have block set")
+    Builder.currentBlock.addCommand(c)
   }
   protected def getCommands: Seq[Command] = {
     require(_closed, "Can't get commands before module close")
     // Unsafe cast but we know that any RawModule uses a DefModule
     // _component is defined as a var on BaseModule and we cannot override mutable vars
-    //_component.get.asInstanceOf[DefModule].commands
     _body.getCommands()
   }
 
@@ -226,7 +220,6 @@ abstract class RawModule extends BaseModule {
     _component = Some(component)
     _component
   }
-  // private[chisel3] val stagedSecretCommands = collection.mutable.ArrayBuffer[Command]()
 
   private[chisel3] def secretConnection(left: Data, _right: Data)(implicit si: SourceInfo): Unit = {
 
