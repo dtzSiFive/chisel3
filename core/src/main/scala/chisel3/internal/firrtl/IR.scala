@@ -339,7 +339,7 @@ private[chisel3] object ir {
       extends Definition
   case class DefObject(sourceInfo: SourceInfo, id: HasId, className: String) extends Definition
 
-  class Block(val sourceInfo: SourceInfo, val owner: Option[Command]) {
+  class Block(val sourceInfo: SourceInfo, owner: Option[Command]) {
     private var _commandsBuilder = ArraySeq.newBuilder[Command]
     private var _commands:       Seq[Command] = null
     private var _secretCommands: mutable.ArrayBuffer[Command] = null
@@ -370,12 +370,6 @@ private[chisel3] object ir {
         _secretCommands.toSeq
     }
     private[chisel3] def getAllCommands(): Seq[Command] = getCommands() ++ getSecretCommands()
-  }
-
-  object Block {
-    def unapply(block: Block): Option[(Seq[Command], SourceInfo)] = {
-      Some((block.getAllCommands(), block.sourceInfo))
-    }
   }
 
   class When(val sourceInfo: SourceInfo, val pred: Arg) extends Command {
