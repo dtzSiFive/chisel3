@@ -9,6 +9,7 @@ import chisel3.experimental.{attach, Analog, BaseModule}
 
 object Examples {
   import Annotations._
+  object A extends layer.Layer(layer.LayerConfig.Extract())
   @instantiable
   class AddOne extends Module {
     @public val in = IO(Input(UInt(32.W)))
@@ -39,7 +40,9 @@ object Examples {
   class AddOneParameterized(width: Int) extends Module {
     @public val in = IO(Input(UInt(width.W)))
     @public val out = IO(Output(UInt(width.W)))
+    @public val p = IO(probe.Probe(UInt(width.W), A))
     out := in + 1.U
+    probe.define(p, probe.ProbeValue(out))
   }
   class AddOneWithNested(width: Int) extends Module {
     @public val in = IO(Input(UInt(width.W)))
